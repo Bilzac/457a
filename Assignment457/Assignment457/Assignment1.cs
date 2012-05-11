@@ -12,6 +12,21 @@ namespace Assignment457
             while (true)
             {
                 
+                //console input from user
+                //start, end, search type
+
+                //blocked list array
+                int[,] blocked_array = new int[2,100]; 
+
+
+
+                //create a tree
+                Tree test_tree = new Tree(blocked_array); 
+
+                
+
+
+
             }
         }
     }

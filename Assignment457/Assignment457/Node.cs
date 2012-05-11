@@ -5,13 +5,7 @@ using System.Text;
 
 namespace Assignment457
 {
-    class Tree
+    class Node
     {
-      
-        //constructor
-        public Tree(int[,] blocked_array)
-        {
-
-        }
     }
 }
