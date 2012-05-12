@@ -39,8 +39,8 @@ namespace Assignment457
                 exit_node.SetCoordinates(x, y);
                 */
 
-                start_node.SetCoordinates(3, 3);
-                exit_node.SetCoordinates(4, 3); 
+                start_node.SetCoordinates(0,0);
+                exit_node.SetCoordinates(10, 7); 
 
 
                 Console.WriteLine("Search Type:\n[1] Breadth First Search\n[2] Depth First Search\n[3] A* Search");
@@ -54,7 +54,7 @@ namespace Assignment457
                     case 1:
                         //do breadth first search 
                        // BreadthFirstSearch(test_tree);
-                        BreadthFirstSearch(start_node, exit_node, blocked_array, 1, node_queue);
+                        BreadthFirstSearch(start_node, exit_node, blocked_array, 0, node_queue);
                         break; 
                     case 2:
                         //depth first search
@@ -71,7 +71,13 @@ namespace Assignment457
         static bool BreadthFirstSearch(Node start_node, Node exit_node, int[,] blocked_list, int distance, Queue<Node> node_queue)
         {
             /* implementation
-             * start with current node as root            
+             * DUPLICATE LIST - tracks nodes that are already in the tree
+             * NODE_QUEUE - nodes that have not been checked for if they are the exit node
+             * 
+             * 1. start with the starting node as the current node
+             * 2. check if the node is the exit node
+             *  Y - print out the steps 
+             * 
              * add all 4 children if they are not:
              *      1. the exit node - done
              *      2. out of bounds - done
@@ -80,17 +86,21 @@ namespace Assignment457
              * when nodes of 1 level are finished, increase distance
              */ 
             
-            Node current_node = start_node;
-
-            node_queue.Enqueue(current_node);
+            Node current_node = start_node; //start with starting node as root of tree
+            
+            List<string> duplicate_list = new List<string>();  //tracks duplicate nodes in list
+            
+            node_queue.Enqueue(current_node); //add current node to queue
+            duplicate_list.Add(current_node.GetX().ToString() + "," + current_node.GetY().ToString()); //add current node to list
 
             while (true)
             {
                 //check if first node is the solution
                 Node next_node = node_queue.Dequeue();
                 current_node = next_node;
-                if (next_node.NodeCompare(exit_node))
+                if (next_node.NodeCompare(exit_node)) //check if the node is the exit node
                 {                    
+                    //print out solution
                     Console.WriteLine("Found Solution: \n" + current_node.GetX().ToString() + "," + current_node.GetY().ToString());
                     while (current_node.GetParent() != null)
                     {
@@ -101,7 +111,7 @@ namespace Assignment457
                     Console.WriteLine("Distance: " + distance.ToString());
                     return true;
                 }
-                else //add child nodes to queue
+                else //add child nodes of the queue's top node to queue
                 {
                     //get the current node's coordinates
                     int x = current_node.GetX();
@@ -121,45 +131,55 @@ namespace Assignment457
                     y = current_node.GetY();
                     Node child4 = new Node(x, --y, current_node);
 
-                    //CHILD1
-                    if (!child1.NodeCompare(exit_node) && child1.GetX() >= 0 && child1.GetY() >= 0
+                    //CHILDREN 1,2,3,4
+                    if ( child1.GetX() >= 0 && child1.GetY() >= 0
                         && child1.GetX() <= 24 && child1.GetY() <= 24)
                     {
                         current_node.AddChild(child1);
-                        if (!node_queue.Contains(child1))
+                        if (!duplicate_list.Contains(child1.GetX().ToString() + "," + child1.GetY().ToString()))
                         {
                             node_queue.Enqueue(child1);
+                            duplicate_list.Add(child1.GetX().ToString() + "," + child1.GetY().ToString()); 
                         }
                     }
-                    if (!child2.NodeCompare(exit_node) && child2.GetX() >= 0 && child2.GetY() >= 0
+                    if (child2.GetX() >= 0 && child2.GetY() >= 0
                         && child2.GetX() <= 24 && child2.GetY() <= 24)
                     {
                         current_node.AddChild(child2);
-                        if (!node_queue.Contains(child2))
+                        if (!duplicate_list.Contains(child2.GetX().ToString() + "," + child2.GetY().ToString()))
                         {
                             node_queue.Enqueue(child2);
+                            duplicate_list.Add(child2.GetX().ToString() + "," + child2.GetY().ToString());
                         }
                     }
-                    if (!child3.NodeCompare(exit_node) && child3.GetX() >= 0 && child3.GetY() >= 0
+                    if (child3.GetX() >= 0 && child3.GetY() >= 0
                         && child3.GetX() <= 24 && child3.GetY() <= 24)
                     {
                         current_node.AddChild(child3);
-                        if (!node_queue.Contains(child3))
+                        if (!duplicate_list.Contains(child3.GetX().ToString() + "," + child3.GetY().ToString()))
                         {
                             node_queue.Enqueue(child3);
+                            duplicate_list.Add(child3.GetX().ToString() + "," + child3.GetY().ToString());
                         }
                     }
-                    if (!child4.NodeCompare(exit_node) && child4.GetX() >= 0 && child4.GetY() >= 0
+                    if (child4.GetX() >= 0 && child4.GetY() >= 0
                         && child4.GetX() <= 24 && child4.GetY() <= 24)
                     {
                         current_node.AddChild(child4);
-                        if (!node_queue.Contains(child4))
+                        if (!duplicate_list.Contains(child4.GetX().ToString() + "," + child4.GetY().ToString()))
                         {
                             node_queue.Enqueue(child4);
+                            duplicate_list.Add(child4.GetX().ToString() + "," + child4.GetY().ToString());
                         }
                     }               
                 
                 }
+
+                if (node_queue.Count > 1000) //random break so that we don't have infinite loop
+                {
+                    break; 
+                }
+
             }
             return false; 
         }
