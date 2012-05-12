@@ -18,10 +18,10 @@ namespace Assignment457
                 //blocked list array
                 int[,] blocked_array = new int[2,100]; 
 
-
+                Node start_node = new Node(); 
 
                 //create a tree
-                Tree test_tree = new Tree(blocked_array); 
+                Tree test_tree = new Tree(blocked_array, start_node ); 
 
                 
 
