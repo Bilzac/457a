@@ -75,15 +75,10 @@ namespace Assignment457
              * NODE_QUEUE - nodes that have not been checked for if they are the exit node
              * 
              * 1. start with the starting node as the current node
-             * 2. check if the node is the exit node
+             * 2. check if the node at top of queue is the exit node
              *  Y - print out the steps 
-             * 
-             * add all 4 children if they are not:
-             *      1. the exit node - done
-             *      2. out of bounds - done
-             *      3. blocked
-             *      4. the start node
-             * when nodes of 1 level are finished, increase distance
+             *  N - add all children current node to queue 
+             * 3. repeat step 2
              */ 
             
             Node current_node = start_node; //start with starting node as root of tree
