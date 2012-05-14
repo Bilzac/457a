@@ -76,6 +76,8 @@ namespace Assignment457
                  */
 
                 byte[,] node_list = new byte[25, 25];
+                int steps = 1;
+                bool searchResult = false;
 
                 //Start Node S1
                 start_node.SetCoordinates(2,11);
@@ -89,6 +91,8 @@ namespace Assignment457
                 //exit_node.SetCoordinates(24, 24);
                 node_list[exit_node.GetX(), exit_node.GetY()] = 2;
 
+                Stopwatch stopWatch = new Stopwatch();
+
 
                 for (int i = 0; i < blocked_array.GetLength(0); i++)
                 {
@@ -101,21 +105,29 @@ namespace Assignment457
                 search_type = Convert.ToInt32(Console.ReadLine());
 
 
-                 //create a tree
-                //Tree test_tree = new Tree(blocked_array, start_node, exit_node);
-
                 switch (search_type){
                     case 1:
-                        //do breadth first search 
-                       // BreadthFirstSearch(test_tree);
-                        BreadthFirstSearch(start_node, exit_node, blocked_array, 0, node_queue);
+                        //do breadth first search     
+                        stopWatch.Start();
+                        searchResult = BreadthFirstSearch(start_node, exit_node, ref node_list, ref steps, node_queue);
+                        stopWatch.Stop();
+                        if (searchResult)
+                        {
+                            printSearchInformation(start_node, steps, node_list);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Search Failed");
+                        }
+                        Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
+                        stopWatch.Reset(); 
                         break; 
                     case 2:
                         //depth first search
-                        int steps = 0;
-                        bool searchResult = false;
+                        //int steps = 0;
+                        //bool searchResult = false;
                         //For timing purposes
-                        Stopwatch stopWatch = new Stopwatch();
+                        
                         stopWatch.Start();
                         searchResult = DepthFirstSearch(start_node, ref steps, ref node_list);
                         stopWatch.Stop();
@@ -128,6 +140,7 @@ namespace Assignment457
                             Console.WriteLine("Search Failed");
                         }
                         Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
+                        stopWatch.Reset(); 
                         break; 
                     case 3:
                         //a* search 
@@ -138,7 +151,7 @@ namespace Assignment457
             //return; 
         }
 
-        static bool BreadthFirstSearch(Node start_node, Node exit_node, int[,] blocked_list, int distance, Queue<Node> node_queue)
+        static bool BreadthFirstSearch(Node start_node, Node exit_node, ref byte[,] node_list, ref int steps, Queue<Node> node_queue)
         {
             /* implementation
              * DUPLICATE LIST - tracks nodes that are already in the tree
@@ -170,74 +183,56 @@ namespace Assignment457
                     while (current_node.GetParent() != null)
                     {
                         current_node = current_node.GetParent();
-                        Console.WriteLine(current_node.GetX().ToString() + "," + current_node.GetY().ToString());
-                        distance++;
+                        //Console.WriteLine(current_node.GetX().ToString() + "," + current_node.GetY().ToString());
+                        node_list[current_node.GetX(), current_node.GetY()] = 4; 
+                        steps++;
                     }
-                    Console.WriteLine("Distance: " + distance.ToString());
+                    Console.WriteLine("Distance: " + steps.ToString());
                     return true;
                 }
                 else //add child nodes of the queue's top node to queue
-                {
-                    //get the current node's coordinates
-                    int x = current_node.GetX();
-                    int y = current_node.GetY();
-                    //create child nodes
-                    Node child1 = new Node(++x, y, current_node);
-                    //get the current node's coordinates
-                    x = current_node.GetX();
-                    y = current_node.GetY();
-                    Node child2 = new Node(--x, y, current_node);
-                    //get the current node's coordinates
-                    x = current_node.GetX();
-                    y = current_node.GetY();
-                    Node child3 = new Node(x, ++y, current_node);
-                    //get the current node's coordinates
-                    x = current_node.GetX();
-                    y = current_node.GetY();
-                    Node child4 = new Node(x, --y, current_node);
+                {                   
+                    //mark current node as visited
+                    node_list[current_node.GetX(), current_node.GetY()] = 3; 
 
-                    //CHILDREN 1,2,3,4
-                    if ( child1.GetX() >= 0 && child1.GetY() >= 0
-                        && child1.GetX() <= 24 && child1.GetY() <= 24)
+                    for (int i = 0; i < 4; i++)
                     {
-                        current_node.AddChild(child1);
-                        if (!duplicate_list.Contains(child1.GetX().ToString() + "," + child1.GetY().ToString()))
+                        //get current node's position
+                        int x = current_node.GetX();
+                        int y = current_node.GetY();
+                        Node child = null; //child node 
+
+                        //create child nodes
+                        switch (i)
                         {
-                            node_queue.Enqueue(child1);
-                            duplicate_list.Add(child1.GetX().ToString() + "," + child1.GetY().ToString()); 
+                            case 0:
+                                child = new Node(++x, y, current_node);
+                                break;
+                            case 1:
+                                child = new Node(--x, y, current_node);
+                                break; 
+                            case 2:
+                                child = new Node(x, ++y, current_node);
+                                break;
+                            case 3:
+                                child = new Node(x, --y, current_node);
+                                break; 
+                        }
+                        //check that current node is not out of bounds
+                        //or not blocked node
+                        if (child.GetX() >= 0 && child.GetY() >= 0
+                            && child.GetX() <= 24 && child.GetY() <= 24 
+                            && node_list[child.GetX(),child.GetY()] != 1)
+                        {
+                            current_node.AddChild(child);
+                            if (!duplicate_list.Contains(child.GetX().ToString() + "," + child.GetY().ToString()))
+                            {
+                                node_queue.Enqueue(child);
+                                duplicate_list.Add(child.GetX().ToString() + "," + child.GetY().ToString());
+                            }
                         }
                     }
-                    if (child2.GetX() >= 0 && child2.GetY() >= 0
-                        && child2.GetX() <= 24 && child2.GetY() <= 24)
-                    {
-                        current_node.AddChild(child2);
-                        if (!duplicate_list.Contains(child2.GetX().ToString() + "," + child2.GetY().ToString()))
-                        {
-                            node_queue.Enqueue(child2);
-                            duplicate_list.Add(child2.GetX().ToString() + "," + child2.GetY().ToString());
-                        }
-                    }
-                    if (child3.GetX() >= 0 && child3.GetY() >= 0
-                        && child3.GetX() <= 24 && child3.GetY() <= 24)
-                    {
-                        current_node.AddChild(child3);
-                        if (!duplicate_list.Contains(child3.GetX().ToString() + "," + child3.GetY().ToString()))
-                        {
-                            node_queue.Enqueue(child3);
-                            duplicate_list.Add(child3.GetX().ToString() + "," + child3.GetY().ToString());
-                        }
-                    }
-                    if (child4.GetX() >= 0 && child4.GetY() >= 0
-                        && child4.GetX() <= 24 && child4.GetY() <= 24)
-                    {
-                        current_node.AddChild(child4);
-                        if (!duplicate_list.Contains(child4.GetX().ToString() + "," + child4.GetY().ToString()))
-                        {
-                            node_queue.Enqueue(child4);
-                            duplicate_list.Add(child4.GetX().ToString() + "," + child4.GetY().ToString());
-                        }
-                    }               
-                
+                    
                 }
 
                 if (node_queue.Count > 1000) //random break so that we don't have infinite loop
