@@ -84,9 +84,9 @@ namespace Assignment457
                 //Start Node 0,0
                 //start_node.SetCoordinates(0,0);
                 //Exit Node E1
-                exit_node.SetCoordinates(23,19);
+                //exit_node.SetCoordinates(23,19);
                 //Exit Node E2
-                //exit_node.SetCoordinates(2, 21);
+                exit_node.SetCoordinates(2, 21);
                 //Exit Node E3
                 //exit_node.SetCoordinates(24, 24);
                 node_list[exit_node.GetX(), exit_node.GetY()] = 2;
@@ -231,12 +231,12 @@ namespace Assignment457
                                 duplicate_list.Add(child.GetX().ToString() + "," + child.GetY().ToString());
                             }
                         }
-                    }
-                    
+                    }                    
                 }
 
                 if (node_queue.Count > 1000) //random break so that we don't have infinite loop
                 {
+                    //didn't find solution :(
                     break; 
                 }
 
