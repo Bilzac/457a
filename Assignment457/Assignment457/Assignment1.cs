@@ -59,16 +59,16 @@ namespace Assignment457
                 Node exit_node = new Node(); 
                
                 //TEST 1 [E1]
-                start_node.SetCoordinates(2, 11);
-                exit_node.SetCoordinates(23, 19);
+                //start_node.SetCoordinates(2, 11);
+                //exit_node.SetCoordinates(23, 19);
 
                 //TEST 2 [E2]
                 //start_node.SetCoordinates(2, 11);
                 //exit_node.SetCoordinates(2, 21);
 
                 //TEST 3 [E3]
-                //start_node.SetCoordinates(0,0);
-                //exit_node.SetCoordinates(24, 24);
+                start_node.SetCoordinates(0,0);
+                exit_node.SetCoordinates(24, 24);
 
                 //TEST FAIL
                 //start_node.SetCoordinates(0, 24);
@@ -95,7 +95,6 @@ namespace Assignment457
 
 
                 // variables required for search
-                Queue<Node> node_queue = new Queue<Node>(); // unvisited node queue
                 int steps = 1;
                 bool searchResult = false;
                 Stopwatch stopWatch = new Stopwatch();
@@ -109,7 +108,7 @@ namespace Assignment457
                     case 1:
                         //do breadth first search     
                         stopWatch.Start();
-                        searchResult = BreadthFirstSearch(start_node, exit_node, ref node_list, ref steps, node_queue);
+                        searchResult = BreadthFirstSearch(start_node, exit_node, ref node_list, ref steps);
                         stopWatch.Stop();
                         if (searchResult)
                         {
@@ -147,10 +146,16 @@ namespace Assignment457
                         node_list[exit_node.GetX(), exit_node.GetY()] = 0; // set exit node
                         
                         stopWatch.Start();
-                        searchResult = AStarSearch(start_node, exit_node, node_list);
+                        searchResult = AStarSearch(start_node, exit_node, node_list, ref steps);
                         stopWatch.Stop();
-                        if (!searchResult)
+                        if (searchResult)
+                        {
+                            printSearchInformation(start_node, steps, node_list);
+                        }
+                        else
+                        {
                             Console.WriteLine("Search Failed!");
+                        }
                         Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
                         stopWatch.Reset(); 
                         break; 
@@ -160,7 +165,7 @@ namespace Assignment457
             }
         }
 
-        static bool BreadthFirstSearch(Node start_node, Node exit_node, ref byte[,] node_list, ref int steps, Queue<Node> node_queue)
+        static bool BreadthFirstSearch(Node start_node, Node exit_node, ref byte[,] node_list, ref int steps)
         {
             /* implementation
              * DUPLICATE LIST - tracks nodes that are already in the tree
@@ -171,8 +176,8 @@ namespace Assignment457
              *  Y - print out the steps 
              *  N - add all children current node to queue 
              * 3. repeat step 2
-             */ 
-            
+             */
+            Queue<Node> node_queue = new Queue<Node>();  // unvisited queue node
             Node current_node = start_node; //start with starting node as root of tree
             
             List<string> duplicate_list = new List<string>();  //tracks duplicate nodes in list
@@ -352,8 +357,9 @@ namespace Assignment457
                     else if (node_list[k, l] == 1)
                     {
                         Console.Write("#");
+                        nodes_not_visited++; // blocked nodes can never been visited...
                     }
-                    else if (node_list[k, l] == 3)
+                    else if (node_list[k, l] == 3 || node_list[k,l] == 6 || node_list[k,l] == 7)
                     {
                         Console.Write("-");
                     }
@@ -374,12 +380,12 @@ namespace Assignment457
                 Console.WriteLine("");
             }
             Console.WriteLine("Solution Cost: " + steps);
-            Console.WriteLine("Total Visited Nodes: " + ((25*25)-nodes_not_visited));
+            Console.WriteLine("Total Visited Nodes: " + ((25*25) - nodes_not_visited));
             Console.WriteLine("");
         }
 
         // A Star Search Method 
-        static bool AStarSearch(Node startNode, Node endNode, byte[,] nodeMap)
+        static bool AStarSearch(Node startNode, Node endNode, byte[,] nodeMap, ref int steps)
         {
             int nodesExplored = 1; // the start node
             Node currentNode = startNode;
@@ -396,7 +402,9 @@ namespace Assignment457
                 nodeMap[currentNode.GetX(), currentNode.GetY()] = 6; // the node will be explored
                 if (currentNode.NodeCompare(endNode)) // if solution is found, display results
                 {
-                    printAStarResults(currentNode, nodesExplored);
+                    steps = currentNode.F + 1; // + 1 to also include start node
+                    markSolutionPath(currentNode, nodesExplored, nodeMap);
+                    nodeMap[endNode.GetX(), endNode.GetY()] = 2;
                     return true; 
                 }
                 else //add child nodes to list
@@ -482,22 +490,16 @@ namespace Assignment457
              list.Add(updatedNode);
          }
 
-        public static void printAStarResults(Node currentNode, int nodesExplored)
+        public static void markSolutionPath(Node currentNode, int nodesExplored, byte[,] nodeList)
         {
-            Console.WriteLine();
-            Console.WriteLine("Solution found! ");
-            Console.WriteLine("Solution Cost: " + (currentNode.F + 1));
-            Console.WriteLine("Total Visited Nodes: " + nodesExplored);
-            Console.WriteLine("Complete Path (from end node to start node):");
-
             // get root node of current Node
             Node parentNode = currentNode;
             while (parentNode != null)
             {
-                Console.WriteLine("  (" + parentNode.GetX() + "," + parentNode.GetY() + ")");
+                // mark nodes that are on the solution path
+                nodeList[parentNode.GetX(), parentNode.GetY()] = 4; 
                 parentNode = parentNode.GetParent();
             }
-            Console.WriteLine("");
         }
     }
 }
