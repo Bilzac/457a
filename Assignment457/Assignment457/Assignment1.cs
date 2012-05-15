@@ -11,45 +11,34 @@ namespace Assignment457
 
         static void Main(string[] args)
         {
+            // create blocked list array 
+            int[,] blocked_array = new int[,] { { 0, 23 }, { 0, 22 }, { 0, 17 }, { 0, 5 }, { 0, 4 },
+                                                { 1, 23 }, { 1, 22 }, { 1, 17 }, { 1, 5 }, { 1, 4 },
+                                                { 2, 23 }, { 2, 22 }, { 2, 17 }, { 2, 8 }, { 2, 7 }, { 2, 6 }, { 2, 5 }, { 2, 4 },
+                                                { 3, 23 }, { 3, 22 }, { 3, 21 }, { 3, 20 }, { 3, 17 }, { 3, 8 }, { 3, 7 },
+                                                { 4, 24 }, { 4, 23 }, { 4, 22 }, { 4, 21 }, { 4, 20 }, { 4, 17 }, { 4, 11 }, { 4, 8 }, { 4, 7 },
+                                                { 5, 24 }, { 5, 23 }, { 5, 21 }, { 5, 20 }, { 5, 17 },
+                                                { 6, 23 }, { 6, 17 }, { 6, 7 }, { 6, 6 }, { 6, 5 }, { 6, 4 }, { 6, 3 },
+                                                { 7, 23 }, { 7, 7 }, { 7, 6 }, { 7, 5 }, { 7, 4 }, { 7, 3 },
+                                                { 8, 23 }, { 8, 22 }, { 8, 21 }, { 8, 20 }, { 8, 19 }, { 8, 18 }, { 8, 17 }, { 8, 14 },
+                                                { 9, 23 }, { 9, 20 }, { 9, 19 }, { 9, 18 }, { 9, 14 },
+                                                { 10, 20 }, { 10, 19 }, { 10, 18 }, { 10, 16 }, { 10, 15 }, { 10, 14 }, { 10, 13 }, { 10, 12 },  { 10, 7 }, { 10, 6 }, { 10, 5 }, { 10, 4 }, { 10, 3 }, { 10, 2 },
+                                                { 11, 14 }, { 11, 7 }, { 11, 6 }, { 11, 5 }, { 11, 4 }, { 11, 3}, { 11, 2 },
+                                                { 12, 14 }, { 12, 7 }, { 12, 6 }, { 12, 5 }, { 12, 4 }, { 12, 3 }, { 12, 2 },
+                                                { 14, 22 }, { 14, 21 }, { 14, 20 }, { 14, 18 },
+                                                { 15, 22 }, { 15, 21 }, { 15, 20 }, { 15, 18 }, { 15, 14 }, { 15, 13 }, { 15, 12 }, { 15, 11 }, { 15, 10 }, 
+                                                { 16, 22 }, { 16, 21 }, { 16, 20 }, { 16, 18 }, { 16, 14 }, { 16, 13 }, { 16, 12 }, { 16, 11 }, { 16, 10 },
+                                                { 17, 24 }, { 17, 22 }, { 17, 21 }, { 17, 20 }, { 17, 18 },
+                                                { 18, 24 }, { 18, 22 }, { 18, 21 }, { 18, 20 }, { 18, 18 }, { 18, 12 }, { 18, 11 }, { 18, 10 }, { 18, 9 }, { 18, 8 }, { 18, 7 }, { 18, 6 }, { 18, 5 }, { 18, 4 }, { 18, 3 }, { 18, 2 }, { 18, 1 },
+                                                { 19, 22 }, { 19, 21 }, { 19, 20 }, { 19, 18 }, { 19, 6 }, { 19, 5 }, { 19, 4 }, { 19, 3 }, { 19, 2 }, { 19, 1 },
+                                                { 20, 22 }, { 20, 21 }, { 20, 20 }, { 20, 18 }, { 20, 6 }, { 20, 5 },
+                                                { 21, 13 }, { 21, 12 }, { 21, 11 }, { 21, 10 }, { 21, 9 }, { 21, 8 }, { 21, 6 }, { 21, 5 },
+                                                { 22, 14 }, { 22, 13 }, { 22, 6 },
+                                                { 23, 15 }, { 23, 14 }, { 23, 13 }, { 23, 6 },
+                                                { 24, 16 }, { 24, 15 }, { 24, 14 }, { 24, 13 }, { 24, 12 } };
+
             while (true)
             {
-                
-                //console input from user
-                //start, end, search type
-                int search_type = 0; 
-
-                //blocked list array 
-                int[,] blocked_array = new int[,] { { 0, 23 }, { 0, 22 }, { 0, 17 }, { 0, 5 }, { 0, 4 },
-                                                    { 1, 23 }, { 1, 22 }, { 1, 17 }, { 1, 5 }, { 1, 4 },
-                                                    { 2, 23 }, { 2, 22 }, { 2, 17 }, { 2, 8 }, { 2, 7 }, { 2, 6 }, { 2, 5 }, { 2, 4 },
-                                                    { 3, 23 }, { 3, 22 }, { 3, 21 }, { 3, 20 }, { 3, 17 }, { 3, 8 }, { 3, 7 },
-                                                    { 4, 24 }, { 4, 23 }, { 4, 22 }, { 4, 21 }, { 4, 20 }, { 4, 17 }, { 4, 11 }, { 4, 8 }, { 4, 7 },
-                                                    { 5, 24 }, { 5, 23 }, { 5, 21 }, { 5, 20 }, { 5, 17 },
-                                                    { 6, 23 }, { 6, 17 }, { 6, 7 }, { 6, 6 }, { 6, 5 }, { 6, 4 }, { 6, 3 },
-                                                    { 7, 23 }, { 7, 7 }, { 7, 6 }, { 7, 5 }, { 7, 4 }, { 7, 3 },
-                                                    { 8, 23 }, { 8, 22 }, { 8, 21 }, { 8, 20 }, { 8, 19 }, { 8, 18 }, { 8, 17 }, { 8, 14 },
-                                                    { 9, 23 }, { 9, 20 }, { 9, 19 }, { 9, 18 }, { 9, 14 },
-                                                    { 10, 20 }, { 10, 19 }, { 10, 18 }, { 10, 16 }, { 10, 15 }, { 10, 14 }, { 10, 13 }, { 10, 12 },  { 10, 7 }, { 10, 6 }, { 10, 5 }, { 10, 4 }, { 10, 3 }, { 10, 2 },
-                                                    { 11, 14 }, { 11, 7 }, { 11, 6 }, { 11, 5 }, { 11, 4 }, { 11, 3}, { 11, 2 },
-                                                    { 12, 14 }, { 12, 7 }, { 12, 6 }, { 12, 5 }, { 12, 4 }, { 12, 3 }, { 12, 2 },
-                                                    { 14, 22 }, { 14, 21 }, { 14, 20 }, { 14, 18 },
-                                                    { 15, 22 }, { 15, 21 }, { 15, 20 }, { 15, 18 }, { 15, 14 }, { 15, 13 }, { 15, 12 }, { 15, 11 }, { 15, 10 }, 
-                                                    { 16, 22 }, { 16, 21 }, { 16, 20 }, { 16, 18 }, { 16, 14 }, { 16, 13 }, { 16, 12 }, { 16, 11 }, { 16, 10 },
-                                                    { 17, 24 }, { 17, 22 }, { 17, 21 }, { 17, 20 }, { 17, 18 },
-                                                    { 18, 24 }, { 18, 22 }, { 18, 21 }, { 18, 20 }, { 18, 18 }, { 18, 12 }, { 18, 11 }, { 18, 10 }, { 18, 9 }, { 18, 8 }, { 18, 7 }, { 18, 6 }, { 18, 5 }, { 18, 4 }, { 18, 3 }, { 18, 2 }, { 18, 1 },
-                                                    { 19, 22 }, { 19, 21 }, { 19, 20 }, { 19, 18 }, { 19, 6 }, { 19, 5 }, { 19, 4 }, { 19, 3 }, { 19, 2 }, { 19, 1 },
-                                                    { 20, 22 }, { 20, 21 }, { 20, 20 }, { 20, 18 }, { 20, 6 }, { 20, 5 },
-                                                    { 21, 13 }, { 21, 12 }, { 21, 11 }, { 21, 10 }, { 21, 9 }, { 21, 8 }, { 21, 6 }, { 21, 5 },
-                                                    { 22, 14 }, { 22, 13 }, { 22, 6 },
-                                                    { 23, 15 }, { 23, 14 }, { 23, 13 }, { 23, 6 },
-                                                    { 24, 16 }, { 24, 15 }, { 24, 14 }, { 24, 13 }, { 24, 12 } };
-
-                //unvisited Node queue
-                Queue<Node> node_queue = new Queue<Node>(); 
-
-                Node start_node = new Node();
-                Node exit_node = new Node(); 
-               
                 /*
                 Console.WriteLine("Enter start node coordinates: x");
                 int x = Convert.ToInt32(Console.ReadLine()); 
@@ -64,50 +53,58 @@ namespace Assignment457
                 exit_node.SetCoordinates(x, y);
                 */
 
-                /*
-                 * List of All Nodes and their status
-                 * 0 - > Not Visited and Not Blocked
-                 * 1 - > Blocked
-                 * 2 - > Exit Node
-                 * 3 - > Visited nodes
-                 * 4 - > Nodes part of solution path
-                 * 5 - > Start Node (Not used yet, except by printSearchInformation method)
-                 *
-                 */
+            
+                // start and end nodes
+                Node start_node = new Node();
+                Node exit_node = new Node(); 
+               
+                //TEST 1 [E1]
+                start_node.SetCoordinates(2, 11);
+                exit_node.SetCoordinates(23, 19);
 
-                byte[,] node_list = new byte[25, 25];
-                int steps = 1;
-                bool searchResult = false;
+                //TEST 2 [E2]
+                //start_node.SetCoordinates(2, 11);
+                //exit_node.SetCoordinates(2, 21);
 
-                //FAIL TEST
+                //TEST 3 [E3]
+                //start_node.SetCoordinates(0,0);
+                //exit_node.SetCoordinates(24, 24);
+
+                //TEST FAIL
                 //start_node.SetCoordinates(0, 24);
                 //exit_node.SetCoordinates(24, 24); 
-                //Start Node S1
-                start_node.SetCoordinates(2,11);
-                //Start Node 0,0
-                //start_node.SetCoordinates(0,0);
-                //Exit Node E1
-                exit_node.SetCoordinates(23,19);
-                //Exit Node E2
-                //exit_node.SetCoordinates(2, 21);
-                //Exit Node E3
-                //exit_node.SetCoordinates(24, 24);
-                node_list[exit_node.GetX(), exit_node.GetY()] = 2;
-
-                Stopwatch stopWatch = new Stopwatch();
 
 
+                /* * List of All Nodes and their status
+                   * 0 - > Not Visited and Not Blocked
+                   * 1 - > Blocked
+                   * 2 - > Exit Node
+                   * 3 - > Visited nodes
+                   * 4 - > Nodes part of solution path
+                   * 5 - > Start Node (Not used yet, except by printSearchInformation method)
+                   * 6 - > Node that is explored
+                   * 7 - > Node that is to be explored
+                */
+                // set node statuses
+                byte[,] node_list = new byte[25, 25];
+                node_list[exit_node.GetX(), exit_node.GetY()] = 2; // set exit node
                 for (int i = 0; i < blocked_array.GetLength(0); i++)
                 {
                     node_list[blocked_array[i,0],blocked_array[i,1]] = 1;  //assumed that by default all array values are false, so make blocked true;
                 }
 
 
+                // variables required for search
+                Queue<Node> node_queue = new Queue<Node>(); // unvisited node queue
+                int steps = 1;
+                bool searchResult = false;
+                Stopwatch stopWatch = new Stopwatch();
 
+                // get user input
                 Console.WriteLine("Search Type:\n[1] Breadth First Search\n[2] Depth First Search\n[3] A* Search");
-                search_type = Convert.ToInt32(Console.ReadLine());
+                int search_type = Convert.ToInt32(Console.ReadLine());
 
-
+                // perform search algorithm
                 switch (search_type){
                     case 1:
                         //do breadth first search     
@@ -120,7 +117,7 @@ namespace Assignment457
                         }
                         else
                         {
-                            Console.WriteLine("Search Failed");
+                            Console.WriteLine("Search Failed!");
                         }
                         Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
                         stopWatch.Reset(); 
@@ -140,18 +137,27 @@ namespace Assignment457
                         }
                         else
                         {
-                            Console.WriteLine("Search Failed");
+                            Console.WriteLine("Search Failed!");
                         }
                         Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
                         stopWatch.Reset(); 
                         break; 
-                    case 3:
-                        //a* search 
+                    case 3: // A* search
+                        start_node.calculatePathCost(start_node, exit_node);
+                        node_list[exit_node.GetX(), exit_node.GetY()] = 0; // set exit node
+                        
+                        stopWatch.Start();
+                        searchResult = AStarSearch(start_node, exit_node, node_list);
+                        stopWatch.Stop();
+                        if (!searchResult)
+                            Console.WriteLine("Search Failed!");
+                        Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
+                        stopWatch.Reset(); 
                         break; 
                 }
-                
+
+                Console.WriteLine();
             }
-            //return; 
         }
 
         static bool BreadthFirstSearch(Node start_node, Node exit_node, ref byte[,] node_list, ref int steps, Queue<Node> node_queue)
@@ -256,7 +262,7 @@ namespace Assignment457
             return false; 
         }
 
-         static bool DepthFirstSearch(Node node, ref int count, ref byte[,] node_list)
+        static bool DepthFirstSearch(Node node, ref int count, ref byte[,] node_list)
         {
             int x, y;
             x = node.GetX();
@@ -329,10 +335,8 @@ namespace Assignment457
             }
             return false;
         }
-
-
         //Hacky Method to print out information and graph.
-         static void printSearchInformation(Node start_node, int steps, byte[,] node_list)
+        static void printSearchInformation(Node start_node, int steps, byte[,] node_list)
          {
             int nodes_not_visited = 0;
             node_list[start_node.GetX(), start_node.GetY()] = 5;
@@ -371,6 +375,128 @@ namespace Assignment457
             }
             Console.WriteLine("Solution Cost: " + steps);
             Console.WriteLine("Total Visited Nodes: " + ((25*25)-nodes_not_visited));
+            Console.WriteLine("");
+        }
+
+        // A Star Search Method 
+        static bool AStarSearch(Node startNode, Node endNode, byte[,] nodeMap)
+        {
+            int nodesExplored = 1; // the start node
+            Node currentNode = startNode;
+            List<Node> openList = new List<Node>(); // this is a list of nodes to be explored
+            openList.Add(currentNode); // Add start node to list
+            while (true)
+            {
+                if (openList.Count == 0) // if nothing in list, no solution
+                    break;
+
+                // remove first node from the list to explore
+                currentNode = openList.ElementAt(0);
+                openList.RemoveAt(0);
+                nodeMap[currentNode.GetX(), currentNode.GetY()] = 6; // the node will be explored
+                if (currentNode.NodeCompare(endNode)) // if solution is found, display results
+                {
+                    printAStarResults(currentNode, nodesExplored);
+                    return true; 
+                }
+                else //add child nodes to list
+                {
+                    //get the current node's coordinates
+                    int x = currentNode.GetX();
+                    int y = currentNode.GetY();
+
+                    //create child nodes
+                    Node child1 = new Node(x + 1, y, currentNode);
+                    Node child2 = new Node(x - 1, y, currentNode);
+                    Node child3 = new Node(x, y + 1, currentNode);
+                    Node child4 = new Node(x, y - 1, currentNode);
+
+                    //calculate path costs of all nodes
+                    child1.calculatePathCost(startNode, endNode);
+                    child2.calculatePathCost(startNode, endNode);
+                    child3.calculatePathCost(startNode, endNode);
+                    child4.calculatePathCost(startNode, endNode);
+
+                    // add nodes that are to be explored
+                    addToOpenList(currentNode, child1, openList, nodeMap, ref nodesExplored);
+                    addToOpenList(currentNode, child2, openList, nodeMap, ref nodesExplored);
+                    addToOpenList(currentNode, child3, openList, nodeMap, ref nodesExplored);
+                    addToOpenList(currentNode, child4, openList, nodeMap, ref nodesExplored);
+
+                    // order open list by lowest cost (F)
+                    var query = from node in openList
+                                orderby node.F ascending
+                                select node;
+                    openList = query.ToList();
+                } //fi
+            } //elihw 
+
+            return false; //path has not been found
+        }// end method
+
+        public static void addToOpenList(Node currentNode, Node childNode, List<Node> openList, byte[,] nodeMap, ref int nodesExplored)
+         {
+             int x = childNode.GetX();
+             int y = childNode.GetY();
+
+             // ignore nodes that are on the closed list or blocked or out of bounds
+             if (!(x >= 0 && x <= 24 && y >= 0 && y <= 24) ||
+                 nodeMap[x, y] == 1 || nodeMap[x, y] == 6)
+                 return;
+
+             // if adjacent square is already in the open list, update if necessary
+             if (nodeMap[x, y] == 7)
+             {
+                 // path cost if you go vertically or horizontally is the same (set to one in our case)
+                 int newGScore = currentNode.G + 1;
+                 // if newGScore is lower, then update child node
+                 if (newGScore < childNode.G)
+                     updateNodeInList(openList, childNode, currentNode, newGScore);
+                 // else ignore
+             }
+             else // if adjacent square is not in the open list, add to list to be explored
+             {
+                 openList.Add(childNode);
+                 nodeMap[childNode.GetX(), childNode.GetY()] = 7; // node is in open list to be explored
+                 nodesExplored++;
+             }
+         }
+
+        public static void updateNodeInList(List<Node> list, Node childNode, Node currentNode, int newGScore)
+         {
+             // get and remove node from list
+             IEnumerable<Node> query = from node in list
+                                       where node.GetX() == childNode.GetX() && node.GetY() == childNode.GetY()
+                                       select node;
+             IEnumerator<Node> e = query.GetEnumerator();
+             e.MoveNext();
+             Node updatedNode = e.Current;
+             list.Remove(e.Current);
+
+             // update G and F scores, and change parent to current node
+             updatedNode.G = newGScore;
+             updatedNode.F = updatedNode.G + updatedNode.H;
+             updatedNode.setParent(currentNode);
+
+             // add updated node to list
+             list.Add(updatedNode);
+         }
+
+        public static void printAStarResults(Node currentNode, int nodesExplored)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Solution found! ");
+            Console.WriteLine("Solution Cost: " + (currentNode.F + 1));
+            Console.WriteLine("Total Visited Nodes: " + nodesExplored);
+            Console.WriteLine("Complete Path (from end node to start node):");
+
+            // get root node of current Node
+            Node parentNode = currentNode;
+            while (parentNode != null)
+            {
+                Console.WriteLine("  (" + parentNode.GetX() + "," + parentNode.GetY() + ")");
+                parentNode = parentNode.GetParent();
+            }
             Console.WriteLine("");
         }
     }
