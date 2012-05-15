@@ -79,14 +79,17 @@ namespace Assignment457
                 int steps = 1;
                 bool searchResult = false;
 
+                //FAIL TEST
+                //start_node.SetCoordinates(0, 24);
+                //exit_node.SetCoordinates(24, 24); 
                 //Start Node S1
                 start_node.SetCoordinates(2,11);
                 //Start Node 0,0
                 //start_node.SetCoordinates(0,0);
                 //Exit Node E1
-                //exit_node.SetCoordinates(23,19);
+                exit_node.SetCoordinates(23,19);
                 //Exit Node E2
-                exit_node.SetCoordinates(2, 21);
+                //exit_node.SetCoordinates(2, 21);
                 //Exit Node E3
                 //exit_node.SetCoordinates(24, 24);
                 node_list[exit_node.GetX(), exit_node.GetY()] = 2;
@@ -173,8 +176,17 @@ namespace Assignment457
 
             while (true)
             {
-                //check if first node is the solution
-                Node next_node = node_queue.Dequeue();
+                Node next_node = null; 
+
+                if (node_queue.Count > 0) //make sure that queue is not empty
+                {
+                    //check if first node is the solution
+                    next_node = node_queue.Dequeue();
+                }
+                else
+                {
+                    break; //break out of while loop
+                }
                 current_node = next_node;
                 if (next_node.NodeCompare(exit_node)) //check if the node is the exit node
                 {                    
