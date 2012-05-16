@@ -11,6 +11,27 @@ namespace Assignment457
 
         static void Main(string[] args)
         {
+            while (true)
+            {
+                Console.WriteLine("Assignment Part (a,b,c):");
+                char a = Console.ReadLine().ToCharArray()[0];
+
+                switch (a)
+                {
+                    case 'a':
+                        PartA();
+                        break;
+                    case 'b':
+                        Assignment1b partb = new Assignment1b();
+                        partb.RunPartB();
+                        break;
+                }
+            }
+        }
+
+
+        static void PartA()
+        {
             // create blocked list array 
             int[,] blocked_array = new int[,] { { 0, 23 }, { 0, 22 }, { 0, 17 }, { 0, 5 }, { 0, 4 },
                                                 { 1, 23 }, { 1, 22 }, { 1, 17 }, { 1, 5 }, { 1, 4 },
@@ -37,8 +58,8 @@ namespace Assignment457
                                                 { 23, 15 }, { 23, 14 }, { 23, 13 }, { 23, 6 },
                                                 { 24, 16 }, { 24, 15 }, { 24, 14 }, { 24, 13 }, { 24, 12 } };
 
-            while (true)
-            {
+           // while (true)
+           // {
                 /*
                 Console.WriteLine("Enter start node coordinates: x");
                 int x = Convert.ToInt32(Console.ReadLine()); 
@@ -46,11 +67,7 @@ namespace Assignment457
                 int y = Convert.ToInt32(Console.ReadLine()); 
                 start_node.SetCoordinates(x,y);
 
-                Console.WriteLine("Enter exit node coordinates: x");
-                x = Convert.ToInt32(Console.ReadLine());
-                Console.WriteLine("Enter exit node coordinates: y");
-                y = Convert.ToInt32(Console.ReadLine());
-                exit_node.SetCoordinates(x, y);
+                
                 */
 
             
@@ -162,7 +179,7 @@ namespace Assignment457
                 }
 
                 Console.WriteLine();
-            }
+            //}
         }
 
         static bool BreadthFirstSearch(Node start_node, Node exit_node, ref byte[,] node_list, ref int steps)

@@ -7,13 +7,19 @@ namespace Assignment457
 {
     class Assignment1b
     {
-<<<<<<< HEAD
-        
 
+        //create starting gameboard
+        GameBoard start_game = new GameBoard(GameBoard.MinMax.Max); //start with max node
 
-=======
+        public Assignment1b()
+        {
 
-       
->>>>>>> 62f381018633f94c06fc8254eafc61339d14deb4
+        }
+
+        public void RunPartB()
+        {
+
+        }
+
     }
 }
