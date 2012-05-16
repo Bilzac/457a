@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assignment1.cs" />
+    <Compile Include="Assignment1b.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
