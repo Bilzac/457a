@@ -25,7 +25,10 @@ namespace Assignment457
                         Assignment1b partb = new Assignment1b();
                         partb.RunPartB();
                         break;
+                    default:
+                        break; 
                 }
+                
             }
         }
 

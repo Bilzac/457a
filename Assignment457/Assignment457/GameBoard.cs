@@ -24,6 +24,15 @@ namespace Assignment457
         public GameBoard()
         {
             this.board = new GamePiece[4,4]; //the game board - 4x4 array
+
+            for (int i = 0; i <= 3; i++)
+            {
+                for (int j = 0; j <= 3; j++)
+                {
+                    this.board[i, j] = new GamePiece(Colour.NONE, 0);
+                }
+            }
+            
             this.board[1, 4].stones = 10; //player 1 - white stones (them)
             this.board[1, 4].colour = Colour.WHITE;
 
@@ -36,6 +45,16 @@ namespace Assignment457
         public GameBoard(MinMax node_type)
         {
             this.board = new GamePiece[4, 4]; //the game board - 4x4 array
+            this.board = new GamePiece[4, 4]; //the game board - 4x4 array
+
+            for (int i = 0; i <= 3; i++)
+            {
+                for (int j = 0; j <= 3; j++)
+                {
+                    this.board[i, j] = new GamePiece(Colour.NONE, 0);
+                }
+            }
+
             this.board[0, 3].stones = 10; //player 1 - white stones (them)
             this.board[0, 3].colour = Colour.WHITE;
 
