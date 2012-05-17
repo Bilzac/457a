@@ -12,7 +12,13 @@ namespace Assignment457
         GamePiece[,] board = null;
         int alpha;
         int beta;
-        MinMax node_type; 
+        MinMax node_type; //min - player 1 = white, max - player 2 (us) = black
+        int number_moves; 
+
+        //store parent
+        GameBoard parent = null; 
+        //store children
+        List<GameBoard> children = null; 
         
         public enum MinMax //specify whether this is a min node or a max node
         {
@@ -23,6 +29,11 @@ namespace Assignment457
         // default constructor
         public GameBoard()
         {
+            //parents and children
+            this.parent = null;
+            this.children = new List<GameBoard>(); 
+
+
             this.board = new GamePiece[4,4]; //the game board - 4x4 array
 
             for (int i = 0; i <= 3; i++)
@@ -42,8 +53,12 @@ namespace Assignment457
             this.node_type = MinMax.Null; 
         }
 
-        public GameBoard(MinMax node_type)
+        public GameBoard(MinMax node_type, GameBoard parent)
         {
+            //parents and children
+            this.parent = parent;
+            this.children = new List<GameBoard>(); 
+            
             this.board = new GamePiece[4, 4]; //the game board - 4x4 array
             this.board = new GamePiece[4, 4]; //the game board - 4x4 array
 
@@ -72,9 +87,7 @@ namespace Assignment457
                 this.beta = 0; 
             }
         }
-
-
-
+        
         //public get and set methods
         public MinMax GetNodeType()
         {
@@ -102,7 +115,53 @@ namespace Assignment457
 
         public GamePiece GetGamePiece(int x, int y)
         {
-            return board[x, y]; 
+            return this.board[x, y]; 
+        }
+
+        public GameBoard GetParent()
+        {
+            return this.parent;
+        }
+
+        public List<GameBoard> GetChildren()
+        {
+            return this.children; 
+        }
+
+        //set methods
+        public bool SetParent(GameBoard parent)
+        {
+            this.parent = parent;
+            return true; 
+        }
+
+        public bool SetAlphaBetaValue(int alpha_beta)
+        {
+            if (this.node_type == MinMax.Max)
+            {
+                this.alpha = alpha_beta;
+            }
+            else if (this.node_type == MinMax.Min)
+            {
+                this.beta = alpha_beta; 
+            }
+            return true; 
+        }
+
+        //Add children
+        public bool AddChildren(GameBoard child)
+        {
+            this.children.Add(child);
+            return true; 
+        }
+
+        public GamePiece ReturnPosition(int x, int y)
+        {
+            if (x <= 3 && y <= 3 && x >= 0 && y >= 0) //boundary check
+            {
+                return this.board[x, y];
+            }
+            return null; 
         }
 
     }
