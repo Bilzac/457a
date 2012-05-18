@@ -57,24 +57,9 @@ namespace Assignment457
         {
             //parents and children
             this.parent = parent;
-            this.children = new List<GameBoard>(); 
-            
-            this.board = new GamePiece[4, 4]; //the game board - 4x4 array
-            this.board = new GamePiece[4, 4]; //the game board - 4x4 array
+            this.children = new List<GameBoard>();
 
-            for (int i = 0; i <= 3; i++)
-            {
-                for (int j = 0; j <= 3; j++)
-                {
-                    this.board[i, j] = new GamePiece(Colour.NONE, 0);
-                }
-            }
-
-            this.board[0, 3].stones = 10; //player 1 - white stones (them)
-            this.board[0, 3].colour = Colour.WHITE;
-
-            this.board[3, 0].stones = 10; //player2 - black stones (us)
-            this.board[3, 0].colour = Colour.BLACK; 
+            this.board = parent.GetGameBoard(); 
 
             if (node_type == MinMax.Max)
             {
@@ -112,12 +97,7 @@ namespace Assignment457
         {
             return this.board;
         }
-
-        public GamePiece GetGamePiece(int x, int y)
-        {
-            return this.board[x, y]; 
-        }
-
+               
         public GameBoard GetParent()
         {
             return this.parent;
@@ -163,6 +143,23 @@ namespace Assignment457
             }
             return null; 
         }
+
+        public bool SetStones(int x, int y, int stones)
+        {
+            if (x <= 3 && y <= 3 && x >= 0 && y >= 0) //boundary check
+            {
+                this.board[x, y].stones = stones;
+
+                if (stones == 0)//no stones on square - null colour
+                {
+                    this.board[x, y].colour = Colour.NONE; 
+                }
+
+                return true; 
+            }
+            return false; 
+        }
+
 
     }
 }

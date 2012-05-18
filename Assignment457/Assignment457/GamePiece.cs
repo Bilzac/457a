@@ -20,7 +20,7 @@ namespace Assignment457
     {
         // private variables
         private Colour _colour;
-        private byte _stones;
+        private int _stones;
 
         // Public getters and setters
         public Colour colour
@@ -28,14 +28,14 @@ namespace Assignment457
             set { this._colour = value; }
             get { return this._colour; }
         }
-        public byte stones
+        public int stones
         {
             set { this._stones = value; }
             get { return this._stones; }
         }
 
          //default constructor 
-        public GamePiece(Colour colour, byte stones)
+        public GamePiece(Colour colour, int stones)
         {
             _colour = colour;
             _stones = stones;
