@@ -13,7 +13,7 @@ namespace Assignment457
         int alpha;
         int beta;
         MinMax node_type; //min - player 1 = white, max - player 2 (us) = black
-        int number_moves; 
+        //int number_moves; 
 
         //store parent
         GameBoard parent = null; 
@@ -44,11 +44,11 @@ namespace Assignment457
                 }
             }
             
-            this.board[1, 4].stones = 10; //player 1 - white stones (them)
-            this.board[1, 4].colour = Colour.WHITE;
+            this.board[0, 3].stones = 10; //player 1 - BLACK stones (them)
+            this.board[0, 3].colour = Colour.BLACK;
 
-            this.board[4, 1].stones = 10; //player2 - black stones (us)
-            this.board[4, 1].colour = Colour.BLACK;
+            this.board[3, 0].stones = 10; //player2 - WHITE stones (us)
+            this.board[3, 0].colour = Colour.WHITE;
 
             this.node_type = MinMax.Null; 
         }
@@ -59,7 +59,7 @@ namespace Assignment457
             this.parent = parent;
             this.children = new List<GameBoard>();
 
-            this.board = parent.GetGameBoard(); 
+            this.board = parent.CopyBoard(); 
 
             if (node_type == MinMax.Max)
             {
@@ -112,6 +112,12 @@ namespace Assignment457
         public bool SetParent(GameBoard parent)
         {
             this.parent = parent;
+            return true; 
+        }
+
+        public bool SetNodeType(MinMax type)
+        {
+            this.node_type = type;
             return true; 
         }
 
@@ -169,6 +175,21 @@ namespace Assignment457
             return null; 
         }
 
+        public GamePiece[,] CopyBoard()
+        {
+            GamePiece[,] clone = new GamePiece[4, 4];
+
+            for (int x = 0; x <= 3; x++)
+            {
+                for (int y = 0; y <= 3; y++)
+                {
+                    clone[x, y] = new GamePiece(this.board[x, y].colour, this.board[x, y].stones); 
+                    //clone[x, y].stones = this.board[x, y].stones;
+                    //clone[x, y].colour = this.board[x, y].colour;
+                }
+            }
+            return clone; 
+        }
 
     }
 }

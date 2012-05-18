@@ -10,7 +10,7 @@ namespace Assignment457
     {
 
         //create starting gameboard
-        GameBoard start_game = new GameBoard(GameBoard.MinMax.Max, null); //start with max node
+        //GameBoard start_game = new GameBoard(GameBoard.MinMax.Max, null); //start with max node
         
         Stopwatch timer = new Stopwatch(); 
 
@@ -22,14 +22,13 @@ namespace Assignment457
         {
             Console.WriteLine("Search Agent - Alpha/Beta Pruning"); 
 
-            timer.Start();
+            //timer.Start();
             AlphaBetaSearch(); 
-            timer.Stop(); 
-            Console.WriteLine(timer.Elapsed.ToString()); 
-            timer.Reset();
+            //timer.Stop(); 
+            //Console.WriteLine(timer.Elapsed.ToString()); 
+            //timer.Reset();
 
-            displayBoard(start_game);
-
+            
             return; 
         }
 
@@ -57,8 +56,29 @@ namespace Assignment457
             if alpha >= beta then return beta (cut off)
         return beta (this is the opponent's best move)
                     */
+            //GameBoard parent = new GameBoard(GameBoard.MinMax.Min, null); //player starts
+            GameBoard parent = new GameBoard();
+            parent.SetNodeType(GameBoard.MinMax.Min);
 
+            displayBoard(parent); 
 
+            bool turn = false; //turn 0 = player's turn, turn 1 = our turn
+
+            if (CalculateMoves(parent) == 0)
+            {
+                //WINNER
+                if (turn == false)
+                {
+                    Console.WriteLine("Player 1 wins");
+                }
+                else
+                {
+                    Console.WriteLine("Computer wins"); 
+                }
+
+            }
+            
+                
 
 
         }
@@ -67,9 +87,11 @@ namespace Assignment457
         {
             /* Alpha values are stored in the max nodes
              * Alpha value = max(children's Beta Values of min nodes)
-             * Because we want to minimize opponent moves
-             * 
+             * Because we want to minimize opponent moves             * 
              */ 
+
+            
+
             return 0; 
         }
 
@@ -80,6 +102,7 @@ namespace Assignment457
              * Because we want to maximize our moves
              * 
              */ 
+
             return 0; 
         }
 
@@ -163,56 +186,56 @@ namespace Assignment457
                             int b = y + 1;
                             int c = x;
                             int d = y + 2; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //south x2
                             a = x;
                             b = y - 1;
                             c = x;
-                            d = y - 2; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            d = y - 2;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //eastx2
                             a = x - 1;
                             b = y;
                             c = x - 2;
-                            d = y; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            d = y;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //westx2
                             a = x + 1;
                             b = y;
                             c = x + 2;
-                            d = y; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            d = y;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //nex2
                             a = x + 1;
                             b = y - 1;
                             c = x + 2;
-                            d = y - 2; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            d = y - 2;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //nwx2
                             a = x - 1;
                             b = y - 1;
                             c = x - 2;
-                            d = y - 2; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            d = y - 2;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //se x2
                             a = x + 1;
                             b = y + 1;
                             c = x + 2;
-                            d = y + 2; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            d = y + 2;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
 
                             //swx2
                             a = x - 1;
                             b = y + 1;
                             c = x - 2;
-                            d = y + 2; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves); 
+                            d = y + 2;
+                            moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
                         }
                         else //  4+ stones = 3 squares
                         {
@@ -222,8 +245,8 @@ namespace Assignment457
                             int c = x;
                             int d = y + 2;
                             int e = x;
-                            int f = y + 3; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            int f = y + 3;
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //south x3
                             a = x;
@@ -231,8 +254,8 @@ namespace Assignment457
                             c = x;
                             d = y - 2;
                             e = x;
-                            f = y - 3; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            f = y - 3;
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //eastx3
                             a = x - 1;
@@ -241,7 +264,7 @@ namespace Assignment457
                             d = y;
                             e = x - 3;
                             f = y;
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //westx3
                             a = x + 1;
@@ -250,7 +273,7 @@ namespace Assignment457
                             d = y;
                             e = x + 3;
                             f = y;
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //nex3
                             a = x + 1;
@@ -258,17 +281,17 @@ namespace Assignment457
                             c = x + 2;
                             d = y - 2;
                             e = x + 3;
-                            f = y - 3; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            f = y - 3;
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
-                            //nwx3
+                            //nwx3 //---------????
                             a = x - 1;
-                            b = y - 1;
+                            b = y + 1;
                             c = x - 2;
-                            d = y - 2;
+                            d = y + 2;
                             e = x - 3;
-                            f = y - 3; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            f = y + 3;
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //se x3
                             a = x + 1;
@@ -276,8 +299,8 @@ namespace Assignment457
                             c = x + 2;
                             d = y + 2;
                             e = x + 3;
-                            f = y + 3; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
+                            f = y + 3;
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //swx3
                             a = x - 1;
@@ -285,15 +308,16 @@ namespace Assignment457
                             c = x - 2;
                             d = y + 2;
                             e = x - 3;
-                            f = y + 3; 
-                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves); 
+                            f = y + 3;
+                            moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
                         }
 
                     }
 
                 }
             }
-            return 0; 
+
+            return moves; 
         }
 
 
@@ -317,7 +341,7 @@ namespace Assignment457
 
                     //add child to parent
                     board.AddChildren(child);
-
+                    displayBoard(child); 
                     moves++;
                 }
             }
@@ -354,12 +378,18 @@ namespace Assignment457
                             //add child to parent
                             board.AddChildren(child);
                             moves++;
+                        }else
+                        {
+                            moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
                         }
                     }
                     else
                     {
                         moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
                     }
+                }else
+                {
+                    moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
                 }
             }
             return moves;
@@ -394,7 +424,7 @@ namespace Assignment457
                                     stones--;
 
                                     original_stones = child.ReturnPosition(c, d).stones;
-                                    child.SetStones(c, d, stones + original_stones); //second square
+                                    child.SetStones(c, d, 2 + original_stones); //second square
                                     stones = stones - 2;
 
                                     original_stones = child.ReturnPosition(e, f).stones;
@@ -402,6 +432,7 @@ namespace Assignment457
 
                                     //add child to parent
                                     board.AddChildren(child);
+                                    displayBoard(child); 
                                     moves++;
                                 }
                                 else //only 2 square moves possible
@@ -460,6 +491,8 @@ namespace Assignment457
             }
             Console.WriteLine("|");
             Console.WriteLine("-------------------------------------");
+
+            return; 
         }
 
         public static void displayPieceColour(Colour colour, int num)
