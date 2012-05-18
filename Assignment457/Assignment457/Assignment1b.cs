@@ -26,7 +26,9 @@ namespace Assignment457
             AlphaBetaSearch(); 
             timer.Stop(); 
             Console.WriteLine(timer.Elapsed.ToString()); 
-            timer.Reset(); 
+            timer.Reset();
+
+            displayBoard(start_game);
 
             return; 
         }
@@ -156,5 +158,68 @@ namespace Assignment457
             return 0;
         }
 
+
+        public static void displayBoard(GameBoard gameBoard)
+        {
+            Console.WriteLine("-------------------------------------");
+
+            int counter = 0;
+            while (counter < 4)
+            {
+                displayPieceColour(gameBoard.GetGamePiece(counter, 3).colour, gameBoard.GetGamePiece(counter, 3).stones);
+                counter++;
+            }
+            Console.WriteLine("|");
+            Console.WriteLine("-------------------------------------");
+
+            counter = 0;
+            while (counter < 4)
+            {
+                displayPieceColour(gameBoard.GetGamePiece(counter, 2).colour, gameBoard.GetGamePiece(counter, 2).stones);
+                counter++;
+            }
+            Console.WriteLine("|");
+            Console.WriteLine("-------------------------------------");
+
+            counter = 0;
+            while (counter < 4)
+            {
+                displayPieceColour(gameBoard.GetGamePiece(counter, 1).colour, gameBoard.GetGamePiece(counter, 1).stones);
+                counter++;
+            }
+            Console.WriteLine("|");
+            Console.WriteLine("-------------------------------------");
+
+            counter = 0;
+            while (counter < 4)
+            {
+                displayPieceColour(gameBoard.GetGamePiece(counter, 0).colour, gameBoard.GetGamePiece(counter, 0).stones);
+                counter++;
+            }
+            Console.WriteLine("|");
+            Console.WriteLine("-------------------------------------");
+        }
+
+        public static void displayPieceColour(Colour colour, int num)
+        {
+            if (num == 10)
+            {
+                if (colour == Colour.WHITE)
+                    Console.Write("|///" + num + "///");
+                else if (colour == Colour.BLACK)
+                    Console.Write("|..." + num + "...");
+                else
+                    Console.Write("|   " + num + "   ");
+            }
+            else
+            {
+                if (colour == Colour.WHITE)
+                    Console.Write("|///" + num + "////");
+                else if (colour == Colour.BLACK)
+                    Console.Write("|..." + num + "....");
+                else
+                    Console.Write("|   " + num + "    ");
+            }
+        }
     }
 }
