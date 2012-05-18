@@ -160,6 +160,15 @@ namespace Assignment457
             return false; 
         }
 
+        public GamePiece GetGamePiece(int x, int y)
+        {
+            if (x <= 3 && y <= 3 && x >= 0 && y >= 0) //boundary check
+            {
+                return this.board[x, y];
+            }
+            return null; 
+        }
+
 
     }
 }
