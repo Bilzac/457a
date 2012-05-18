@@ -90,14 +90,17 @@ namespace Assignment457
 
             int moves = 0; 
 
-            Colour player_colour = Colour.NONE; 
+            Colour player_colour = Colour.NONE;
+            GameBoard.MinMax child_type = GameBoard.MinMax.Null; 
 
             if (board.GetNodeType() == GameBoard.MinMax.Max)
             {
-                player_colour = Colour.BLACK; 
+                player_colour = Colour.BLACK;
+                child_type = GameBoard.MinMax.Min; 
             }else if (board.GetNodeType() == GameBoard.MinMax.Min)
             {
-                player_colour = Colour.WHITE; 
+                player_colour = Colour.WHITE;
+                child_type = GameBoard.MinMax.Max; 
             }
 
             for (int x = 0; x <= 3; x++)
@@ -107,14 +110,34 @@ namespace Assignment457
                 {
                     if (board.ReturnPosition(x,y).stones > 0 && board.ReturnPosition(x,y).colour == player_colour)
                     {
+                        //if statement to sort number of stones
+                        //1-2 stones = 1 square; 3 stones = 2 squares, 4+ stones = 3 squares
+                        if (board.ReturnPosition(x, y).stones == 1 || board.ReturnPosition(x, y).stones == 2)
+                        {
+
+                        }
+                        else if (board.ReturnPosition(x, y).stones == 3)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+
                         //POSSIBLE MOVES
                         //direction N
-                        if (board.ReturnPosition(x, y++) != null)//boundary 
+                        int a = x; 
+                        int b = y++; 
+                        if (board.ReturnPosition(a, b) != null)//boundary 
                         {
-                            if (board.ReturnPosition(x, y++).stones == 0) //no stones
+                            if (board.ReturnPosition(a, b).stones == 0 ||board.ReturnPosition(x,y++).colour == player_colour) 
+                                //no opponent in next square N
                             {
-                                moves++; 
-                            }else if(board.ReturnPosition(x,y++).colour == player_colour){
+                                GameBoard child_board = new GameBoard(child_type, board); 
+
+                               // if(a,
+
                                 moves++; 
                             }
 
