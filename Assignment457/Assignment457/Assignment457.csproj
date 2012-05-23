@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Assignment1.cs" />
     <Compile Include="Assignment1b.cs" />
+    <Compile Include="Assignment1c.cs" />
     <Compile Include="GamePiece.cs" />
     <Compile Include="GameBoard.cs" />
     <Compile Include="Node.cs" />

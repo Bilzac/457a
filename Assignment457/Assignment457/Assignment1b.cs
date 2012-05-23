@@ -52,10 +52,10 @@ namespace Assignment457
             int total_moves = 0; 
 
             //random game//
-            parent.SetStones(0, 0, 10, Colour.BLACK);
-            parent.SetStones(1, 0, 3, Colour.WHITE);
-            parent.SetStones(0, 1, 7, Colour.WHITE);
-            //parent.SetStones(1, 1, 4, Colour.WHITE);
+            parent.SetStones(0, 0, 10, Colour.WHITE);
+            parent.SetStones(1, 0, 3, Colour.BLACK);
+            parent.SetStones(0, 1, 3, Colour.BLACK);
+            parent.SetStones(1, 1, 4, Colour.BLACK);
             parent.SetStones(3, 0, 0, Colour.NONE);
             parent.SetStones(0, 3, 0, Colour.NONE); 
             
@@ -66,12 +66,18 @@ namespace Assignment457
             bool turn = false; //turn 0 = player's turn(black,min), turn 1 = our turn(white,max)
             GameBoard next_move = null;
 
-            while(CalculateMoves(parent) != 0 && total_moves < 100)
+            while(CalculateMoves(parent) != 0 && total_moves < 10)
             {   
                 if (turn == false)//their turn (BLACK)
                 {                    
                     Console.WriteLine("Their Move / Player 1");
-                    next_move = CalculateBeta(parent);
+                    //next_move = CalculateBeta(parent);
+
+                    //Random moves :(
+                    //choose random child
+                    next_move = parent.GetChildren().First();
+                    parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
+
                     turn = true; 
                 }
                 else //my move (WHITE)
@@ -88,7 +94,7 @@ namespace Assignment457
             }
 
             //WINNER
-            if (turn == false)
+            if (turn == true)
             {
                 Console.WriteLine("Player 1 wins");
             }
@@ -116,11 +122,12 @@ namespace Assignment457
             {                
                 if (CalculateMoves(child) >= parent.GetAlphaBetaValue()) //get max
                 {
-                    best_child = child; 
+                    best_child = child;
+                    parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
                 }
                 Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
             }
-            parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
+            
             Console.WriteLine("Alpha Value: " + best_child.GetAlphaBetaValue().ToString()); 
             return best_child; 
 
@@ -147,11 +154,11 @@ namespace Assignment457
                 if (CalculateMoves(child) <= parent.GetAlphaBetaValue())
                 {
                     worst_child = child;
+                    parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
                 }
                 Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
             }
-         
-            parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
+                     
             Console.WriteLine("Beta Value: " + worst_child.GetAlphaBetaValue().ToString()); 
             return worst_child; 
             
@@ -361,16 +368,13 @@ namespace Assignment457
                             e = x - 3;
                             f = y - 3;
                             moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
-
-                            //store moves in parent
-                            board.SetAlphaBetaValue(moves); 
+                           
                         }
-
                     }
-
                 }
             }
-
+            //store moves in parent
+            board.SetAlphaBetaValue(moves); 
             return moves; 
         }
 
@@ -389,7 +393,7 @@ namespace Assignment457
 
                     int stones = child.ReturnPosition(x, y).stones;
                     child.SetStones(x, y, 0, player_colour);
-                    
+                                        
                     int original_stones = child.ReturnPosition(a, b).stones; //adjacent square
                     child.SetStones(a, b, stones+original_stones, player_colour);
 
@@ -424,11 +428,11 @@ namespace Assignment457
 
                             int original_stones = child.ReturnPosition(a, b).stones;
                             child.SetStones(a, b, original_stones + 1, player_colour); //first square
-                            stones--;
+                            stones--; //one stone moved into a,b
 
-                            original_stones = child.ReturnPosition(c, d).stones;
+                            original_stones = child.ReturnPosition(c, d).stones; //rest of stones moved into c,d
                             child.SetStones(c, d, stones + original_stones, player_colour); //second square
-
+                            
                             //add child to parent
                             board.AddChildren(child);
                             //displayBoard(child); 
