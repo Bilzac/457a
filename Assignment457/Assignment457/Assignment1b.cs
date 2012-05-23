@@ -22,11 +22,11 @@ namespace Assignment457
         {
             Console.WriteLine("Search Agent - Alpha/Beta Pruning"); 
 
-            //timer.Start();
+            timer.Start();
             AlphaBetaSearch(); 
-            //timer.Stop(); 
-            //Console.WriteLine(timer.Elapsed.ToString()); 
-            //timer.Reset();
+            timer.Stop(); 
+            Console.WriteLine(timer.Elapsed.ToString()); 
+            timer.Reset();
 
             
             return; 
@@ -43,67 +43,118 @@ namespace Assignment457
         return winner
 
     children = all legal moves for player from this board
-    if(max's turn)
-        for each child
-            score = alpha-beta(other player,child,alpha,beta)
-            if score > alpha then alpha = score (we have found a better best move)
-            if alpha >= beta then return alpha (cut off)
-        return alpha (this is our best move)
-    else (min's turn)
-        for each child
-            score = alpha-beta(other player,child,alpha,beta)
-            if score < beta then beta = score (opponent has found a better worse move)
-            if alpha >= beta then return beta (cut off)
-        return beta (this is the opponent's best move)
+    
+    
                     */
             //GameBoard parent = new GameBoard(GameBoard.MinMax.Min, null); //player starts
             GameBoard parent = new GameBoard();
             parent.SetNodeType(GameBoard.MinMax.Min);
+            int total_moves = 0; 
 
+            //random game//
+            parent.SetStones(0, 0, 10, Colour.BLACK);
+            parent.SetStones(1, 0, 3, Colour.WHITE);
+            parent.SetStones(0, 1, 7, Colour.WHITE);
+            //parent.SetStones(1, 1, 4, Colour.WHITE);
+            parent.SetStones(3, 0, 0, Colour.NONE);
+            parent.SetStones(0, 3, 0, Colour.NONE); 
+            
+
+            Console.WriteLine("Starting move:"); 
             displayBoard(parent); 
 
-            bool turn = false; //turn 0 = player's turn, turn 1 = our turn
+            bool turn = false; //turn 0 = player's turn(black,min), turn 1 = our turn(white,max)
+            GameBoard next_move = null;
 
-            if (CalculateMoves(parent) == 0)
-            {
-                //WINNER
-                if (turn == false)
-                {
-                    Console.WriteLine("Player 1 wins");
+            while(CalculateMoves(parent) != 0 && total_moves < 100)
+            {   
+                if (turn == false)//their turn (BLACK)
+                {                    
+                    Console.WriteLine("Their Move / Player 1");
+                    next_move = CalculateBeta(parent);
+                    turn = true; 
                 }
-                else
-                {
-                    Console.WriteLine("Computer wins"); 
+                else //my move (WHITE)
+                {                    
+                    Console.WriteLine("My Move / Player 2");
+                    next_move = CalculateAlpha(parent);
+                    turn = false; 
                 }
 
-            }
-            
                 
+                displayBoard(next_move);
+                parent = next_move;
+                total_moves++; 
+            }
 
-
+            //WINNER
+            if (turn == false)
+            {
+                Console.WriteLine("Player 1 wins");
+            }
+            else
+            {
+                Console.WriteLine("Computer wins");
+            }
         }
 
-        static int CalculateAlpha()
+        static GameBoard CalculateAlpha(GameBoard parent)
         {
             /* Alpha values are stored in the max nodes
              * Alpha value = max(children's Beta Values of min nodes)
              * Because we want to minimize opponent moves             * 
-             */ 
+             */
+            //     if(max's turn)
+            //for each child
+            //    score = alpha-beta(other player,child,alpha,beta)
+            //    if score > alpha then alpha = score (we have found a better best move)
+            //    if alpha >= beta then return alpha (cut off)
+            //return alpha (this is our best move)   
+            GameBoard best_child = parent.GetChildren().ElementAt(0); 
 
-            
+            foreach (GameBoard child in parent.GetChildren())
+            {                
+                if (CalculateMoves(child) >= parent.GetAlphaBetaValue()) //get max
+                {
+                    best_child = child; 
+                }
+                Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
+            }
+            parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
+            Console.WriteLine("Alpha Value: " + best_child.GetAlphaBetaValue().ToString()); 
+            return best_child; 
 
-            return 0; 
         }
 
-        static int CalculateBeta()
+        static GameBoard CalculateBeta(GameBoard parent)
         {
             /* Beta values are stored in the min nodes
              * Beta value = min(alpha Values of max nodes)
              * Because we want to maximize our moves
              * 
-             */ 
+             */
 
-            return 0; 
+            //        else (min's turn)
+            //for each child
+            //    score = alpha-beta(other player,child,alpha,beta)
+            //    if score < beta then beta = score (opponent has found a better worse move)
+            //    if alpha >= beta then return beta (cut off)
+            //return beta (this is the opponent's best move)
+            GameBoard worst_child = parent.GetChildren().ElementAt(0) ;
+
+            foreach (GameBoard child in parent.GetChildren())
+            {               
+                if (CalculateMoves(child) <= parent.GetAlphaBetaValue())
+                {
+                    worst_child = child;
+                }
+                Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
+            }
+         
+            parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
+            Console.WriteLine("Beta Value: " + worst_child.GetAlphaBetaValue().ToString()); 
+            return worst_child; 
+            
         }
 
         static int CalculateMoves(GameBoard board)
@@ -257,7 +308,7 @@ namespace Assignment457
                             f = y - 3;
                             moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
-                            //eastx3
+                            //westx3
                             a = x - 1;
                             b = y;
                             c = x - 2;
@@ -266,7 +317,7 @@ namespace Assignment457
                             f = y;
                             moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
-                            //westx3
+                            //eastx3
                             a = x + 1;
                             b = y;
                             c = x + 2;
@@ -277,11 +328,11 @@ namespace Assignment457
 
                             //nex3
                             a = x + 1;
-                            b = y - 1;
+                            b = y + 1;
                             c = x + 2;
-                            d = y - 2;
+                            d = y + 2;
                             e = x + 3;
-                            f = y - 3;
+                            f = y + 3;
                             moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //nwx3 //---------????
@@ -295,21 +346,24 @@ namespace Assignment457
 
                             //se x3
                             a = x + 1;
-                            b = y + 1;
+                            b = y - 1;
                             c = x + 2;
-                            d = y + 2;
+                            d = y - 2;
                             e = x + 3;
-                            f = y + 3;
+                            f = y - 3;
                             moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
 
                             //swx3
                             a = x - 1;
-                            b = y + 1;
+                            b = y - 1;
                             c = x - 2;
-                            d = y + 2;
+                            d = y - 2;
                             e = x - 3;
-                            f = y + 3;
+                            f = y - 3;
                             moves = CheckThreeSquares(board, child_type, player_colour, x, y, a, b, c, d, e, f, moves);
+
+                            //store moves in parent
+                            board.SetAlphaBetaValue(moves); 
                         }
 
                     }
@@ -334,14 +388,14 @@ namespace Assignment457
                     GameBoard child = new GameBoard(child_type, board);
 
                     int stones = child.ReturnPosition(x, y).stones;
-                    child.SetStones(x, y, 0);
+                    child.SetStones(x, y, 0, player_colour);
                     
                     int original_stones = child.ReturnPosition(a, b).stones; //adjacent square
-                    child.SetStones(a, b, stones+original_stones);
+                    child.SetStones(a, b, stones+original_stones, player_colour);
 
                     //add child to parent
                     board.AddChildren(child);
-                    displayBoard(child); 
+                    //displayBoard(child); 
                     moves++;
                 }
             }
@@ -366,17 +420,18 @@ namespace Assignment457
                             GameBoard child = new GameBoard(child_type, board);
 
                             int stones = child.ReturnPosition(x, y).stones;
-                            child.SetStones(x, y, 0);
+                            child.SetStones(x, y, 0, player_colour);
 
                             int original_stones = child.ReturnPosition(a, b).stones;
-                            child.SetStones(a, b, original_stones + 1); //first square
+                            child.SetStones(a, b, original_stones + 1, player_colour); //first square
                             stones--;
 
                             original_stones = child.ReturnPosition(c, d).stones;
-                            child.SetStones(c, d, stones + original_stones); //second square
+                            child.SetStones(c, d, stones + original_stones, player_colour); //second square
 
                             //add child to parent
                             board.AddChildren(child);
+                            //displayBoard(child); 
                             moves++;
                         }else
                         {
@@ -417,22 +472,22 @@ namespace Assignment457
                                     GameBoard child = new GameBoard(child_type, board);
 
                                     int stones = child.ReturnPosition(x, y).stones;
-                                    child.SetStones(x, y, 0);
+                                    child.SetStones(x, y, 0, player_colour);
 
                                     int original_stones = child.ReturnPosition(a, b).stones;
-                                    child.SetStones(a, b, original_stones + 1); //first square
+                                    child.SetStones(a, b, original_stones + 1, player_colour); //first square
                                     stones--;
 
                                     original_stones = child.ReturnPosition(c, d).stones;
-                                    child.SetStones(c, d, 2 + original_stones); //second square
+                                    child.SetStones(c, d, 2 + original_stones, player_colour); //second square
                                     stones = stones - 2;
 
                                     original_stones = child.ReturnPosition(e, f).stones;
-                                    child.SetStones(e, f, stones + original_stones); //third square
+                                    child.SetStones(e, f, stones + original_stones, player_colour); //third square
 
                                     //add child to parent
                                     board.AddChildren(child);
-                                    displayBoard(child); 
+                                    //displayBoard(child); 
                                     moves++;
                                 }
                                 else //only 2 square moves possible

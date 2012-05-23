@@ -45,10 +45,10 @@ namespace Assignment457
             }
             
             this.board[0, 3].stones = 10; //player 1 - BLACK stones (them)
-            this.board[0, 3].colour = Colour.BLACK;
+            this.board[0, 3].colour = Colour.BLACK; //MIN
 
             this.board[3, 0].stones = 10; //player2 - WHITE stones (us)
-            this.board[3, 0].colour = Colour.WHITE;
+            this.board[3, 0].colour = Colour.WHITE; //MAX
 
             this.node_type = MinMax.Null; 
         }
@@ -150,11 +150,12 @@ namespace Assignment457
             return null; 
         }
 
-        public bool SetStones(int x, int y, int stones)
+        public bool SetStones(int x, int y, int stones, Colour colour)
         {
             if (x <= 3 && y <= 3 && x >= 0 && y >= 0) //boundary check
             {
                 this.board[x, y].stones = stones;
+                this.board[x, y].colour = colour; 
 
                 if (stones == 0)//no stones on square - null colour
                 {
