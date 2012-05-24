@@ -26,6 +26,8 @@ namespace Assignment457
                         partb.RunPartB();
                         break;
                     default:
+                        Assignment1c partC = new Assignment1c();
+                        partC.RunPartC();
                         break; 
                 }
                 
