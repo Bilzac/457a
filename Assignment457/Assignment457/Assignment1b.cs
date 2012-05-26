@@ -116,13 +116,13 @@ namespace Assignment457
             //    if score > alpha then alpha = score (we have found a better best move)
             //    if alpha >= beta then return alpha (cut off)
             //return alpha (this is our best move)   
-            GameBoard best_child = parent.GetChildren().ElementAt(0); 
+            GameBoard best_child = parent.GetChildren().ElementAt(0); //best is first child
 
             foreach (GameBoard child in parent.GetChildren())
             {                
                 if (CalculateMoves(child) >= parent.GetAlphaBetaValue()) //get max
                 {
-                    best_child = child;
+                    best_child = child; //new best child
                     parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
                 }
                 Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
@@ -166,9 +166,9 @@ namespace Assignment457
 
         static int CalculateMoves(GameBoard board)
         {
-            /* 
-             * 
-             * 
+            /* goes through all the possible moves
+             * on a gameboard
+             * returns number of moves
              */
 
             int moves = 0; 
