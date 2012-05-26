@@ -89,12 +89,12 @@ namespace Assignment457
                 //exit_node.SetCoordinates(2, 21);
 
                 //TEST 3 [E3]
-                start_node.SetCoordinates(0,0);
-                exit_node.SetCoordinates(24, 24);
+                //start_node.SetCoordinates(0,0);
+                //exit_node.SetCoordinates(24, 24);
 
                 //TEST FAIL
-                //start_node.SetCoordinates(0, 24);
-                //exit_node.SetCoordinates(24, 24); 
+                start_node.SetCoordinates(0, 24);
+                exit_node.SetCoordinates(24, 24); 
 
 
                 /* * List of All Nodes and their status
@@ -413,11 +413,8 @@ namespace Assignment457
             Node currentNode = startNode;
             List<Node> openList = new List<Node>(); // this is a list of nodes to be explored
             openList.Add(currentNode); // Add start node to list
-            while (true)
+            while (openList.Count != 0) // if nothing in list, no solution
             {
-                if (openList.Count == 0) // if nothing in list, no solution
-                    break;
-
                 // remove first node from the list to explore
                 currentNode = openList.ElementAt(0);
                 openList.RemoveAt(0);
