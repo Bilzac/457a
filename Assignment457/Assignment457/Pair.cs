@@ -12,6 +12,7 @@ namespace Assignment457
         int _y;
         int _solution;
         int _tenure;
+        bool _isInitialized;
 
         // Public getters
         public int x 
@@ -26,18 +27,23 @@ namespace Assignment457
         {
             get { return this._solution; }
         }
-        public int tenure 
+        public bool isInitialized
         {
-            set { this._tenure = value; } 
-            get { return this._tenure; }
+            get { return this._isInitialized; }
         }
 
         // Constructor
-        public Pair(int x, int y, int solution)
+        public Pair()
+        {
+            _isInitialized = false;
+        }
+        
+        public Pair(int x, int y, int solution, bool isInitialized)
         {
             _x = x;
             _y = y;
             _solution = solution;
+            _isInitialized = true;
         }
     }
 }

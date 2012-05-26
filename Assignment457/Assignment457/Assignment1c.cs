@@ -91,68 +91,75 @@ namespace Assignment457
             Console.WriteLine(currentSolution);
 
             // create tabu list
-            List<Pair> tabuList = new List<Pair>();
+            int[,] tabuList = new int[21, 21];
 
             // find optimal solution
             int counter = 0;
-            while (counter < 20) // for now, stop after three iterations
+            while (counter < 4) // for now, stop after three iterations
             {
                 counter++; // for testing purposes only....
 
+                // reduce tenure value
                 resetTabuList(tabuList);
 
                 // Get sorted candidate list
                 List<Pair> validPairs = getCandidatesFromNeighbourhood(tabuList, departments, distanceMatrix, flowMatrix);
-                Pair bestCandidate = validPairs.ElementAt(0);
-                
-                // check to see if the new solution is optimal than the previous solution
-                if (bestCandidate.solution < currentSolution)
+
+                // make sure that the tabu list is not full
+                if (validPairs.Count > 0)
                 {
+                    // get the solution of the best candidate
+                    Pair bestCandidate = validPairs.ElementAt(0);
                     currentSolution = bestCandidate.solution;
-                    // save ordering
                     Console.WriteLine(bestCandidate.x + " " + bestCandidate.y);
+
+                    // save ordering
                     departments = swapValues(departments, bestCandidate.x, bestCandidate.y);
-                    bestCandidate.tenure = 4;
-                    tabuList.Add(bestCandidate);
+
+                    // set tenure
+                    int siteA = bestCandidate.x;
+                    int siteB = bestCandidate.y;
+                    int depA = departments[bestCandidate.y];
+                    int depB = departments[bestCandidate.x];
+
+                    tabuList[depB, siteB] = 100;
+                    tabuList[depA, siteA] = 100;
                 }
             }
 
             Console.WriteLine(currentSolution);
         }
 
-        public static void resetTabuList(List<Pair> tabuList)
+        public static void resetTabuList(int[,] tabuList)
         {
-            // subtract tenure by 1
-            tabuList.Select(c => { c.tenure = c.tenure - 1; return c; }).ToList();
-            // remove all pairs with tenure = 0
-            var query = from pair in tabuList
-                        where pair.tenure != 0
-                        select pair;
-            tabuList = query.ToList();
+            for (int i = 1; i < tabuList.GetLength(0); i++)
+            {
+                for (int j = 1; j < tabuList.GetLength(0); j++)
+                {
+                    if (tabuList[i, j] > 0)
+                        tabuList[i, j] = tabuList[i, j] - 1;
+                }
+            }
         }
 
-        public static List<Pair> getCandidatesFromNeighbourhood(List<Pair> tabuList, int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
+        public static List<Pair> getCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
         {
             List<Pair> list = new List<Pair>();
             for (int i = 1; i < departments.Length; i++)
             {
                 for (int j = 1; j < departments.Length; j++)
                 {
-                    int[] newDepartments = swapValues(departments, i, j);
-                    int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
-                    Pair pair = new Pair(i, j, solution);
-
-                    // if not in tabu list, add to candidate list
-                    var tabuQuery = from tabuPair in tabuList
-                                    where tabuPair.x == i && tabuPair.y == j
-                                    select tabuPair;
-                    if (tabuQuery.ToList().Count == 0)
+                    if (!isInTabuList(tabuList, i, j, departments[i], departments[j]))
                     {
+                        int[] newDepartments = swapValues(departments, i, j);
+                        int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
+                        Pair pair = new Pair(i, j, solution, true);
+
                         list.Add(pair);
                     }
                 }
             }
-
+            
             // order list with the optimal solution first
             var query = from pair in list
                         orderby pair.solution ascending
@@ -160,9 +167,17 @@ namespace Assignment457
             return query.ToList();
         }
 
+        public static bool isInTabuList(int[,] tabuList, int siteA, int siteB, int depA, int depB) 
+        {
+            // check if the reverse move is in the tabu list
+            if (tabuList[depA, siteB] > 0 || tabuList[depB, siteA] > 0)
+                return true; // if it is, dont pursue it
+            return false; // move not in tabu list
+        }
+
         public static int[] swapValues(int[] list, int x, int y)
         {
-            // create a new list
+            // create a new list (a new instance so that the original does not get overwritten)
             int[] newList = new int[21];
             for (int i = 0; i < newList.Length; i++)
             {
