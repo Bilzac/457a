@@ -101,7 +101,7 @@ namespace Assignment457
                 resetTabuList(tabuList);
 
                 // Get sorted candidate list
-                List<Pair> validPairs = getAllCandidatesFromNeighbourhood(tabuList, departments, bestSolution, distanceMatrix, flowMatrix);
+                List<Pair> validPairs = getSomeCandidatesFromNeighbourhood(tabuList, departments, bestSolution, distanceMatrix, flowMatrix);
 
                 // make sure that the tabu list is not empty
                 if (validPairs.Count > 0)
@@ -113,7 +113,7 @@ namespace Assignment457
                     if (bestCandidate.solution < bestSolution)
                     {
                         bestSolution = bestCandidate.solution;
-                        Console.WriteLine(bestCandidate.solution + ", iteration " + counter + " : " + bestCandidate.x + ", " + bestCandidate.y );
+                        Console.WriteLine(bestCandidate.solution + ", iter: " + counter + ", swapped (" + bestCandidate.x + "," + bestCandidate.y +")" );
                     }
 
                     // save ordering
@@ -129,7 +129,7 @@ namespace Assignment457
                     //tabuList[depB, siteB] = 5;
                     //tabuList[depA, siteA] = 5; 
 
-                    // set range for tenure
+                    // set dynamic tabu list
                     setTenure(tabuList, siteA, siteB, depA, depB);
                 }
             }
@@ -137,8 +137,6 @@ namespace Assignment457
             Console.WriteLine("The best Solution is " + bestSolution);
             Console.WriteLine();
         }
-
-        
 
         public static void resetTabuList(int[,] tabuList)
         {
@@ -152,6 +150,7 @@ namespace Assignment457
             }
         }
 
+        // Makes tabu list size dynamic
         public static void setTenure(int [,] tabuList, int siteA, int siteB, int depA, int depB)
         {
             Random random = new Random();
@@ -162,10 +161,42 @@ namespace Assignment457
             tabuList[depA, siteA] = randomNumber;
         }
 
+        // Use less than the whole neighbourhood to select the next solution
         public static List<Pair> getSomeCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
         {
-            // To be implemented
-            return null;
+            Random random = new Random();
+            int iRandom = random.Next(1, 20);
+            int jRandom = random.Next(1, 20);
+
+            // check to make sure that the moves that valid
+            while (iRandom == jRandom || iRandom > jRandom)
+            {
+                iRandom = random.Next(1, 20);
+                jRandom = random.Next(1, 20);
+            }
+
+            List<Pair> list = new List<Pair>();
+            for (int i = iRandom; i < departments.Length; i++)
+            {
+                for (int j = jRandom; j < departments.Length; j++)
+                {
+                    int[] newDepartments = swapValues(departments, i, j);
+                    int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
+                    Pair pair = new Pair(i, j, solution, true);
+
+                    if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
+                    {
+                        // Aspiration Condition - A tabu move will be considered only if it 
+                        // provides a better solution than the best solution previously computed 
+                        if (solution < bestSolution)
+                            list.Add(pair);
+                    }
+                    else
+                        list.Add(pair);
+                }
+
+            }
+            return list;
         }
 
         public static List<Pair> getAllCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
