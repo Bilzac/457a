@@ -76,17 +76,14 @@ namespace Assignment457
             // department[i] = department, i = location
             int[] departments = new int[21] 
                 {  
-                   0, // department does not exist
-                   1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
-                  11, 12, 13, 14, 15, 16, 17, 18, 19, 20 
+                    0,  // ignore
+                    1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
+                   11, 12, 13, 14, 15, 16, 17, 18, 19, 20 
                 };
 
             // get initial solution 
             int currentSolution = computeSolution(departments, distanceMatrix, flowMatrix);
-
-            // set initial solution as the best solution
             int bestSolution = currentSolution;
-
             // for testing purposes
             Console.WriteLine(currentSolution);
 
@@ -95,10 +92,9 @@ namespace Assignment457
 
             // find optimal solution
             int counter = 0;
-            while (counter < 4) // for now, stop after three iterations
+            while (currentSolution >= 1285) // for now, stop after three iterations
             {
-                counter++; // for testing purposes only....
-
+                counter++;
                 // reduce tenure value
                 resetTabuList(tabuList);
 
@@ -110,8 +106,11 @@ namespace Assignment457
                 {
                     // get the solution of the best candidate
                     Pair bestCandidate = validPairs.ElementAt(0);
-                    currentSolution = bestCandidate.solution;
-                    Console.WriteLine(bestCandidate.x + " " + bestCandidate.y);
+                    if (bestCandidate.solution < currentSolution)
+                    {
+                        Console.WriteLine(bestCandidate.solution + " : " + counter);
+                        currentSolution = bestCandidate.solution;
+                    }
 
                     // save ordering
                     departments = swapValues(departments, bestCandidate.x, bestCandidate.y);
@@ -122,8 +121,11 @@ namespace Assignment457
                     int depA = departments[bestCandidate.y];
                     int depB = departments[bestCandidate.x];
 
-                    tabuList[depB, siteB] = 100;
-                    tabuList[depA, siteA] = 100;
+                    //tabuList[depB, siteB] = 5;
+                    //tabuList[depA, siteA] = 5;
+
+                    // set range
+                    setTenure(tabuList, siteA, siteB, depA, depB);
                 }
             }
 
@@ -134,7 +136,7 @@ namespace Assignment457
         {
             for (int i = 1; i < tabuList.GetLength(0); i++)
             {
-                for (int j = 1; j < tabuList.GetLength(0); j++)
+                for (int j = i + 1; j < tabuList.GetLength(0); j++)
                 {
                     if (tabuList[i, j] > 0)
                         tabuList[i, j] = tabuList[i, j] - 1;
@@ -142,12 +144,22 @@ namespace Assignment457
             }
         }
 
+        public static void setTenure(int [,] tabuList, int siteA, int siteB, int depA, int depB)
+        {
+            Random random = new Random();
+            int randomNumber = random.Next(3, 10);
+
+            tabuList[depB, siteB] = randomNumber;
+            randomNumber = random.Next(3, 10);
+            tabuList[depA, siteA] = randomNumber;
+        }
+
         public static List<Pair> getCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
         {
             List<Pair> list = new List<Pair>();
             for (int i = 1; i < departments.Length; i++)
             {
-                for (int j = 1; j < departments.Length; j++)
+                for (int j = i + 1; j < departments.Length; j++)
                 {
                     if (!isInTabuList(tabuList, i, j, departments[i], departments[j]))
                     {
@@ -170,8 +182,13 @@ namespace Assignment457
         public static bool isInTabuList(int[,] tabuList, int siteA, int siteB, int depA, int depB) 
         {
             // check if the reverse move is in the tabu list
-            if (tabuList[depA, siteB] > 0 || tabuList[depB, siteA] > 0)
-                return true; // if it is, dont pursue it
+            if (depA < siteB && tabuList[depA, siteB] > 0)
+                return true;
+            else if (depB < siteA && tabuList[depB, siteA] > 0)
+                return true;
+
+           /* if (tabuList[depA, siteB] > 0 || tabuList[depB, siteA] > 0)
+                return true; // if it is, dont pursue it*/
             return false; // move not in tabu list
         }
 
@@ -179,7 +196,7 @@ namespace Assignment457
         {
             // create a new list (a new instance so that the original does not get overwritten)
             int[] newList = new int[21];
-            for (int i = 0; i < newList.Length; i++)
+            for (int i = 0; i < list.Length; i++)
             {
                 newList[i] = list[i];
             }
@@ -197,7 +214,7 @@ namespace Assignment457
             int solution = 0;
             for (int i = 1; i < departments.Length; i++)
             {
-                for (int j = 1; j < departments.Length; j++)
+                for (int j = i + 1; j < departments.Length; j++)
                 {
                     int flow = flowMatrix[departments[i], departments[j]];
                     int distance = distanceMatrix[i, j];
