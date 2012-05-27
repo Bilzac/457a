@@ -101,7 +101,7 @@ namespace Assignment457
                 resetTabuList(tabuList);
 
                 // Get sorted candidate list
-                List<Pair> validPairs = getCandidatesFromNeighbourhood(tabuList, departments, bestSolution, distanceMatrix, flowMatrix);
+                List<Pair> validPairs = getAllCandidatesFromNeighbourhood(tabuList, departments, bestSolution, distanceMatrix, flowMatrix);
 
                 // make sure that the tabu list is not empty
                 if (validPairs.Count > 0)
@@ -138,6 +138,8 @@ namespace Assignment457
             Console.WriteLine();
         }
 
+        
+
         public static void resetTabuList(int[,] tabuList)
         {
             for (int i = 1; i < tabuList.GetLength(0); i++)
@@ -160,7 +162,13 @@ namespace Assignment457
             tabuList[depA, siteA] = randomNumber;
         }
 
-        public static List<Pair> getCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
+        public static List<Pair> getSomeCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
+        {
+            // To be implemented
+            return null;
+        }
+
+        public static List<Pair> getAllCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
         {
             List<Pair> list = new List<Pair>();
             for (int i = 1; i < departments.Length; i++)
