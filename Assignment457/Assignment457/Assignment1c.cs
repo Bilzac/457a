@@ -93,38 +93,27 @@ namespace Assignment457
 
             // find optimal solution
             int counter = 0;
-            while (counter < 25) // for now, stop after three iterations
+            while (counter < 2000) // stop after 2000 iterations
             {
                 counter++;
+
                 // reduce tenure value
                 resetTabuList(tabuList);
-
-                if (counter == 20)
-                {
-                    int asdf = 0;
-                }
 
                 // Get sorted candidate list
                 List<Pair> validPairs = getCandidatesFromNeighbourhood(tabuList, departments, bestSolution, distanceMatrix, flowMatrix);
 
-                // make sure that the tabu list is not full
+                // make sure that the tabu list is not empty
                 if (validPairs.Count > 0)
                 {
                     // get the solution of the best candidate
                     Pair bestCandidate = validPairs.ElementAt(0);
 
                     // if the swap improves the solution, save it as best solution
-                    if (bestCandidate.solution < currentSolution)
+                    if (bestCandidate.solution < bestSolution)
                     {
                         bestSolution = bestCandidate.solution;
-                        Console.WriteLine(bestCandidate.solution + " : " + counter + " : " + bestCandidate.x + ", " + bestCandidate.y );
-
-                        /*for (int i = 1; i < departments.Length; i++)
-                        {
-                            Console.Write(departments[i] + " ");
-                        }
-
-                        Console.WriteLine();*/
+                        Console.WriteLine(bestCandidate.solution + ", iteration " + counter + " : " + bestCandidate.x + ", " + bestCandidate.y );
                     }
 
                     // save ordering
@@ -137,15 +126,16 @@ namespace Assignment457
                     int depA = departments[bestCandidate.y];
                     int depB = departments[bestCandidate.x];
 
-                    tabuList[depB, siteB] = 5;
-                    tabuList[depA, siteA] = 5; 
+                    //tabuList[depB, siteB] = 5;
+                    //tabuList[depA, siteA] = 5; 
 
-                    // set range
-                    //setTenure(tabuList, siteA, siteB, depA, depB);
+                    // set range for tenure
+                    setTenure(tabuList, siteA, siteB, depA, depB);
                 }
             }
 
-            Console.WriteLine(currentSolution);
+            Console.WriteLine("The best Solution is " + bestSolution);
+            Console.WriteLine();
         }
 
         public static void resetTabuList(int[,] tabuList)
@@ -163,10 +153,10 @@ namespace Assignment457
         public static void setTenure(int [,] tabuList, int siteA, int siteB, int depA, int depB)
         {
             Random random = new Random();
-            int randomNumber = random.Next(3, 10);
+            int randomNumber = random.Next(2, 8);
 
             tabuList[depB, siteB] = randomNumber;
-            randomNumber = random.Next(3, 10);
+            randomNumber = random.Next(0, 20);
             tabuList[depA, siteA] = randomNumber;
         }
 
@@ -203,11 +193,6 @@ namespace Assignment457
         public static bool isInTabuList(int[,] tabuList, int siteA, int siteB, int depA, int depB) 
         {
             // check if the reverse move is in the tabu list
-            /*if (depA < siteB && tabuList[depA, siteB] > 0)
-                return true;
-            else if (depB < siteA && tabuList[depB, siteA] > 0)
-                return true;
-            */
             if (tabuList[depA, siteB] > 0 || tabuList[depB, siteA] > 0)
                 return true; // if it is, dont pursue it
             return false; // move not in tabu list
