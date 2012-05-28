@@ -11,24 +11,30 @@ namespace Assignment457
 
         static void Main(string[] args)
         {
+
             while (true)
             {
+
+                Assignment1a parta = null;
+                Assignment1b partb = null;
+                Assignment1c partc = null; 
+
                 Console.WriteLine("Assignment Part (a,b,c):");
                 char a = Console.ReadLine().ToCharArray()[0];
 
                 switch (a)
                 {
                     case 'a':
-                        Assignment1a parta = new Assignment1a(); 
+                        parta = new Assignment1a(); 
                         parta.PartA();
                         break;
                     case 'b':
-                        Assignment1b partb = new Assignment1b();
+                        partb = new Assignment1b();
                         partb.RunPartB();
                         break;
                     default:
-                        Assignment1c partC = new Assignment1c();
-                        partC.RunPartC();
+                        partc = new Assignment1c();
+                        partc.RunPartC();
                         break; 
                 }
                 

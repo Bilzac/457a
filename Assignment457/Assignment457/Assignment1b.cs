@@ -50,7 +50,7 @@ namespace Assignment457
             GameBoard parent = new GameBoard();
             parent.SetNodeType(GameBoard.MinMax.Min);
             int total_moves = 0; 
-
+            /*
             //random game//
             parent.SetStones(0, 0, 10, Colour.WHITE);
             parent.SetStones(1, 0, 3, Colour.BLACK);
@@ -58,7 +58,7 @@ namespace Assignment457
             parent.SetStones(1, 1, 4, Colour.BLACK);
             parent.SetStones(3, 0, 0, Colour.NONE);
             parent.SetStones(0, 3, 0, Colour.NONE); 
-            
+            */
 
             Console.WriteLine("Starting move:"); 
             displayBoard(parent); 
@@ -66,7 +66,11 @@ namespace Assignment457
             bool turn = false; //turn 0 = player's turn(black,min), turn 1 = our turn(white,max)
             GameBoard next_move = null;
 
-            while(CalculateMoves(parent) != 0 && total_moves < 10)
+            //bool turn = true; 
+
+            //CalculateMoves(parent); 
+
+            while(CalculateMoves(parent) != 0 && total_moves < 1000)
             {   
                 if (turn == false)//their turn (BLACK)
                 {                    
@@ -75,7 +79,11 @@ namespace Assignment457
 
                     //Random moves :(
                     //choose random child
-                    next_move = parent.GetChildren().First();
+
+                    Random random_number = new Random();
+                    int black_move = random_number.Next(parent.GetChildren().Count - 1); 
+
+                    next_move = parent.GetChildren().ElementAt(black_move);
                     parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
 
                     turn = true; 
@@ -83,11 +91,47 @@ namespace Assignment457
                 else //my move (WHITE)
                 {                    
                     Console.WriteLine("My Move / Player 2");
-                    next_move = CalculateAlpha(parent);
+                    GameBoard start_move = CalculateAlpha(parent); //current node is a beta
+                    next_move = start_move; 
+                    GameBoard next_move_tmp = null;                    
+                    int counter = 0;
+                    
+                    while (counter < 3)
+                    {
+                        next_move_tmp = next_move; 
+                        CalculateMoves(next_move);
+                        next_move = CalculateBeta(next_move); //get worst for opponent move from children
+                        //next_move_tmp = next_move; 
+
+                        if (next_move == null)
+                        {
+                            next_move = next_move_tmp;  
+                            break;
+                        }
+
+                        next_move_tmp = next_move; 
+                        CalculateMoves(next_move);
+                        next_move = CalculateAlpha(next_move); //get best move from children
+
+                        if (next_move == null)
+                        {
+                            next_move = next_move_tmp;
+                            break;
+                        }
+
+                        counter++;
+                    }
+
+                    while (next_move.GetParent() != start_move)
+                    {
+                        next_move = next_move.GetParent();
+                        //displayBoard(next_move); 
+                    }
+                    
                     turn = false; 
                 }
 
-                
+                Console.WriteLine("Move #: " + total_moves);                 
                 displayBoard(next_move);
                 parent = next_move;
                 total_moves++; 
@@ -116,21 +160,26 @@ namespace Assignment457
             //    if score > alpha then alpha = score (we have found a better best move)
             //    if alpha >= beta then return alpha (cut off)
             //return alpha (this is our best move)   
-            GameBoard best_child = parent.GetChildren().ElementAt(0); //best is first child
 
-            foreach (GameBoard child in parent.GetChildren())
-            {                
-                if (CalculateMoves(child) >= parent.GetAlphaBetaValue()) //get max
+            if (parent.GetChildren().Count > 0)
+            {
+
+                GameBoard best_child = parent.GetChildren().ElementAt(0); //best is first child
+
+                foreach (GameBoard child in parent.GetChildren())
                 {
-                    best_child = child; //new best child
-                    parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
+                    if (CalculateMoves(child) >= parent.GetAlphaBetaValue()) //get max
+                    {
+                        best_child = child; //new best child
+                        parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
+                    }
+                   // Console.Write(child.GetAlphaBetaValue().ToString() + ", ");
                 }
-                Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
-            }
-            
-            Console.WriteLine("Alpha Value: " + best_child.GetAlphaBetaValue().ToString()); 
-            return best_child; 
 
+                Console.WriteLine("Alpha Value: " + best_child.GetAlphaBetaValue().ToString());
+                return best_child;
+            }
+            return null; 
         }
 
         static GameBoard CalculateBeta(GameBoard parent)
@@ -147,21 +196,25 @@ namespace Assignment457
             //    if score < beta then beta = score (opponent has found a better worse move)
             //    if alpha >= beta then return beta (cut off)
             //return beta (this is the opponent's best move)
-            GameBoard worst_child = parent.GetChildren().ElementAt(0) ;
+            if (parent.GetChildren().Count > 0)
+            {
+                GameBoard worst_child = parent.GetChildren().ElementAt(0);
 
-            foreach (GameBoard child in parent.GetChildren())
-            {               
-                if (CalculateMoves(child) <= parent.GetAlphaBetaValue())
+                foreach (GameBoard child in parent.GetChildren())
                 {
-                    worst_child = child;
-                    parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
+                    if (CalculateMoves(child) <= parent.GetAlphaBetaValue())
+                    {
+                        worst_child = child;
+                        parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
+                    }
+                    //Console.Write(child.GetAlphaBetaValue().ToString() + ", ");
                 }
-                Console.Write(child.GetAlphaBetaValue().ToString() + ", "); 
+
+                Console.WriteLine("Beta Value: " + worst_child.GetAlphaBetaValue().ToString());
+                return worst_child;
             }
-                     
-            Console.WriteLine("Beta Value: " + worst_child.GetAlphaBetaValue().ToString()); 
-            return worst_child; 
-            
+
+            return null; 
         }
 
         static int CalculateMoves(GameBoard board)
@@ -499,11 +552,19 @@ namespace Assignment457
                                     moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
                                 }
                             }
+                            else //only 2 square moves possible
+                            {
+                                moves = CheckTwoSquares(board, child_type, player_colour, x, y, a, b, c, d, moves);
+                            }
                         }
                         else //only 1 square move possible
                         {
                             moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
                         }
+                    }
+                    else //only 1 square move possible
+                    {
+                        moves = CheckAdjacentMove(board, child_type, player_colour, x, y, a, b, moves);
                     }
                 }
             }

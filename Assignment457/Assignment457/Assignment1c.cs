@@ -129,19 +129,24 @@ namespace Assignment457
                     int depB = departments[bestCandidate.x];
 
                     // set tenure
-                    //tabuList[depA, siteA] = 5; 
-                    //tabuList[depB, siteB] = 5;
+                    tabuList[depA, siteA] = 10; 
+                    tabuList[depB, siteB] = 10;
 
                     // set dynamic tabu list
-                    setTenure(tabuList, siteA, siteB, depA, depB);
+                    //setTenure(tabuList, siteA, siteB, depA, depB);
 
                     // increase frequency of move
-                    frequencyList[depA, siteA] = frequencyList[depA, siteA] + 1;
-                    frequencyList[depB, siteB] = frequencyList[depB, siteB] + 1;
+                    //frequencyList[depA, siteA] = frequencyList[depA, siteA] + 1;
+                    //frequencyList[depB, siteB] = frequencyList[depB, siteB] + 1;
                 }
             }
 
             Console.WriteLine("The best Solution is " + bestSolution);
+            for (int i = 0; i < departments.Length; i++)
+            {
+                Console.Write(departments[i] + ", ");
+            }
+
             Console.WriteLine();
         }
 
