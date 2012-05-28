@@ -7,6 +7,8 @@ namespace Assignment457
 {
     class Assignment1c
     {
+        private const int MOVE_FREQUENCY_LIMIT = 100;
+
         public Assignment1c()
         {
 
@@ -71,7 +73,7 @@ namespace Assignment457
             return; 
         }
 
-        public static void doTabuSearch(int [,] distanceMatrix, int[,] flowMatrix)
+        public void doTabuSearch(int [,] distanceMatrix, int[,] flowMatrix)
         {
             // department[i] = department, i = location
             int[] departments = new int[21] 
@@ -84,12 +86,13 @@ namespace Assignment457
             // get initial solution 
             int currentSolution = computeSolution(departments, distanceMatrix, flowMatrix);
             int bestSolution = currentSolution;
-
-            // for testing purposes
             Console.WriteLine(currentSolution);
 
             // create tabu list
             int[,] tabuList = new int[21, 21];
+
+            // create list to store the frequency of the moves
+            int[,] frequencyList = new int[21, 21];
 
             // find optimal solution
             int counter = 0;
@@ -101,13 +104,13 @@ namespace Assignment457
                 resetTabuList(tabuList);
 
                 // Get sorted candidate list
-                List<Pair> validPairs = getSomeCandidatesFromNeighbourhood(tabuList, departments, bestSolution, distanceMatrix, flowMatrix);
+                List<Pair> candidatePairs = getAllCandidatesFromNeighbourhood(tabuList, frequencyList, departments, bestSolution, distanceMatrix, flowMatrix);
 
-                // make sure that the tabu list is not empty
-                if (validPairs.Count > 0)
+                // make sure that the the candidates list is not empty
+                if (candidatePairs.Count > 0)
                 {
                     // get the solution of the best candidate
-                    Pair bestCandidate = validPairs.ElementAt(0);
+                    Pair bestCandidate = candidatePairs.ElementAt(0);
 
                     // if the swap improves the solution, save it as best solution
                     if (bestCandidate.solution < bestSolution)
@@ -120,17 +123,21 @@ namespace Assignment457
                     departments = swapValues(departments, bestCandidate.x, bestCandidate.y);
                     currentSolution = bestCandidate.solution;
 
-                    // set tenure
                     int siteA = bestCandidate.x;
                     int siteB = bestCandidate.y;
                     int depA = departments[bestCandidate.y];
                     int depB = departments[bestCandidate.x];
 
-                    //tabuList[depB, siteB] = 5;
+                    // set tenure
                     //tabuList[depA, siteA] = 5; 
+                    //tabuList[depB, siteB] = 5;
 
                     // set dynamic tabu list
                     setTenure(tabuList, siteA, siteB, depA, depB);
+
+                    // increase frequency of move
+                    frequencyList[depA, siteA] = frequencyList[depA, siteA] + 1;
+                    frequencyList[depB, siteB] = frequencyList[depB, siteB] + 1;
                 }
             }
 
@@ -138,7 +145,7 @@ namespace Assignment457
             Console.WriteLine();
         }
 
-        public static void resetTabuList(int[,] tabuList)
+        public void resetTabuList(int[,] tabuList)
         {
             for (int i = 1; i < tabuList.GetLength(0); i++)
             {
@@ -151,7 +158,7 @@ namespace Assignment457
         }
 
         // Makes tabu list size dynamic
-        public static void setTenure(int [,] tabuList, int siteA, int siteB, int depA, int depB)
+        public void setTenure(int [,] tabuList, int siteA, int siteB, int depA, int depB)
         {
             Random random = new Random();
             int randomNumber = random.Next(2, 8);
@@ -162,7 +169,10 @@ namespace Assignment457
         }
 
         // Use less than the whole neighbourhood to select the next solution
-        public static List<Pair> getSomeCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
+        public List<Pair> getSomeCandidatesFromNeighbourhood(
+            int[,] tabuList, int[,] frequencyList,
+            int[] departments, int bestSolution, 
+            int[,] distanceMatrix, int[,] flowMatrix)
         {
             Random random = new Random();
             int iRandom = random.Next(1, 20);
@@ -180,56 +190,73 @@ namespace Assignment457
             {
                 for (int j = jRandom; j < departments.Length; j++)
                 {
-                    int[] newDepartments = swapValues(departments, i, j);
-                    int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
-                    Pair pair = new Pair(i, j, solution, true);
-
-                    if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
+                    if (!usedMoveToManyTimes(frequencyList, i, j, departments[i], departments[j]))
                     {
-                        // Aspiration Condition - A tabu move will be considered only if it 
-                        // provides a better solution than the best solution previously computed 
-                        if (solution < bestSolution)
+                        int[] newDepartments = swapValues(departments, i, j);
+                        int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
+                        Pair pair = new Pair(i, j, solution, true);
+
+                        if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
+                        {
+                            // Aspiration Condition - A tabu move will be considered only if it 
+                            // provides a better solution than the best solution previously computed 
+                            if (solution < bestSolution)
+                                list.Add(pair);
+                        }
+                        else
                             list.Add(pair);
-                    }
-                    else
-                        list.Add(pair);
-                }
-
-            }
-            return list;
-        }
-
-        public static List<Pair> getAllCandidatesFromNeighbourhood(int[,] tabuList, int[] departments, int bestSolution, int[,] distanceMatrix, int[,] flowMatrix)
-        {
-            List<Pair> list = new List<Pair>();
-            for (int i = 1; i < departments.Length; i++)
-            {
-                for (int j = i + 1; j < departments.Length; j++)
-                {
-                    int[] newDepartments = swapValues(departments, i, j);
-                    int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
-                    Pair pair = new Pair(i, j, solution, true);
-
-                    if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
-                    {
-                        // Aspiration Condition - A tabu move will be considered only if it 
-                        // provides a better solution than the best solution previously computed 
-                        if (solution < bestSolution)
-                            list.Add(pair);
-                    } else {
-                        list.Add(pair);
                     }
                 }
             }
-            
-            // order list with the optimal solution first
+
+            // Aspiration Criteria - Order list with the best solution first. This
+            // means that the best solution from the neighbourhood is always selected.
             var query = from pair in list
                         orderby pair.solution ascending
                         select pair;
             return query.ToList();
         }
 
-        public static bool isInTabuList(int[,] tabuList, int siteA, int siteB, int depA, int depB) 
+        public List<Pair> getAllCandidatesFromNeighbourhood(
+            int[,] tabuList, int[,] frequencyList,
+            int[] departments, int bestSolution, 
+            int[,] distanceMatrix, int[,] flowMatrix)
+        {
+            List<Pair> list = new List<Pair>();
+            for (int i = 1; i < departments.Length; i++)
+            {
+                for (int j = i + 1; j < departments.Length; j++)
+                {
+                    if (!usedMoveToManyTimes(frequencyList, i, j, departments[i], departments[j]))
+                    {
+                        int[] newDepartments = swapValues(departments, i, j);
+                        int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
+                        Pair pair = new Pair(i, j, solution, true);
+
+                        if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
+                        {
+                            // Aspiration Criteria - A tabu move will be considered only if it 
+                            // provides a better solution than the best solution previously computed 
+                            if (solution < bestSolution)
+                                list.Add(pair);
+                        }
+                        else
+                        {
+                            list.Add(pair);
+                        }
+                    }
+                }
+            }
+            
+            // Aspiration Criteria - Order list with the best solution first. This
+            // means that the best solution from the neighbourhood is always selected.
+            var query = from pair in list
+                        orderby pair.solution ascending
+                        select pair;
+            return query.ToList();
+        }
+
+        public bool isInTabuList(int[,] tabuList, int siteA, int siteB, int depA, int depB) 
         {
             // check if the reverse move is in the tabu list
             if (tabuList[depA, siteB] > 0 || tabuList[depB, siteA] > 0)
@@ -237,7 +264,16 @@ namespace Assignment457
             return false; // move not in tabu list
         }
 
-        public static int[] swapValues(int[] list, int x, int y)
+        public bool usedMoveToManyTimes(int[,] frequencyList, int siteA, int siteB, int depA, int depB)
+        {
+            // check the frequency of the reverse move
+            if (frequencyList[depA, siteB] > MOVE_FREQUENCY_LIMIT ||
+                frequencyList[depB, siteA] > MOVE_FREQUENCY_LIMIT)
+                return true; // if it is, dont pursue it
+            return false; // move is allowed
+        }
+
+        public int[] swapValues(int[] list, int x, int y)
         {
             // create a new list (a new instance so that the original does not get overwritten)
             int[] newList = new int[21];
@@ -253,7 +289,7 @@ namespace Assignment457
             return newList;
         }
 
-        public static int computeSolution(int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
+        public int computeSolution(int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
         {
             // find initial solution
             int solution = 0;
