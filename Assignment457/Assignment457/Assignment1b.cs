@@ -53,14 +53,13 @@ namespace Assignment457
                     Console.WriteLine("Their Move / Player 1");
                     //next_move = CalculateBeta(parent);
 
-                    //Random moves :(
+                    //Random Agent :(
                     //choose random child
-
                     Random random_number = new Random();
                     int black_move = random_number.Next(parent.GetChildren().Count - 1);
 
                     next_move = parent.GetChildren().ElementAt(black_move);
-                    parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
+                    //parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
 
                     turn = true;
                 }
@@ -69,20 +68,21 @@ namespace Assignment457
                     Console.WriteLine("My Move / Player 2");
 
                     //next_move = null;
-                    int best = -1;                    
+                    int best = 10000;                    
 
-                    CalculateMoves(parent);
+                    //the parent is a max node (next_move)
+                    //the children are min nodes
 
                     foreach (GameBoard child in parent.GetChildren())
                     {
-                        CalculateAlphaBeta(child, 5, -1000, 1000, GameBoard.MinMax.Max);
-                        if (child.GetAlphaBetaValue() >= best)
+                        CalculateAlphaBeta(child, 5, -100000, 100000, GameBoard.MinMax.Min);
+                                                
+                        if (child.GetAlphaBetaValue() <= best)
                         {
                             best = child.GetAlphaBetaValue();
                             next_move = child; 
                         }
                     }
-
                     parent.SetAlphaBetaValue(best); 
 
                     turn = false; 
@@ -227,14 +227,16 @@ namespace Assignment457
             int moves = CalculateMoves(parent); 
             if (moves == 0 || depth == 0) //terminal node
             {
-                return 10000;
+                //return parent.GetAlphaBetaValue(); --also works???
+                return 10000; 
             }
 
             if (player == GameBoard.MinMax.Max) //max player
             {
                 foreach (GameBoard child in parent.GetChildren())
                 {
-                    alpha = Math.Max(alpha, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Min)); 
+                    //children are min nodes
+                    alpha = Math.Max(alpha, CalculateAlphaBeta(child, depth-1, alpha, beta, child.GetNodeType()));                     
                     child.SetAlphaBetaValue(alpha); 
                     if(beta <= alpha)
                     {
@@ -243,11 +245,12 @@ namespace Assignment457
                     return alpha; 
                 }
             }
-            else
+            else //min player
             {
                 foreach (GameBoard child in parent.GetChildren())
                 {
-                    beta = Math.Min(beta, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Max));
+                    //children are max nodes
+                    beta = Math.Min(beta, CalculateAlphaBeta(child, depth-1, alpha, beta, child.GetNodeType()));
                     child.SetAlphaBetaValue(beta); 
                     if (beta <= alpha)
                     {
@@ -266,13 +269,7 @@ namespace Assignment457
             /* Alpha values are stored in the max nodes
              * Alpha value = max(children's Beta Values of min nodes)
              * Because we want to minimize opponent moves             * 
-             */
-            //     if(max's turn)
-            //for each child
-            //    score = alpha-beta(other player,child,alpha,beta)
-            //    if score > alpha then alpha = score (we have found a better best move)
-            //    if alpha >= beta then return alpha (cut off)
-            //return alpha (this is our best move)   
+             */           
 
             if (parent.GetChildren().Count > 0)
             {
@@ -285,11 +282,9 @@ namespace Assignment457
                     {
                         best_child = child; //new best child
                         parent.SetAlphaBetaValue(best_child.GetAlphaBetaValue());
-                    }
-                   // Console.Write(child.GetAlphaBetaValue().ToString() + ", ");
+                    }                   
                 }
 
-                //Console.WriteLine("Max Value: " + best_child.GetAlphaBetaValue().ToString());
                 return best_child;
             }
             return null; 
@@ -302,13 +297,7 @@ namespace Assignment457
              * Because we want to maximize our moves
              * 
              */
-
-            //        else (min's turn)
-            //for each child
-            //    score = alpha-beta(other player,child,alpha,beta)
-            //    if score < beta then beta = score (opponent has found a better worse move)
-            //    if alpha >= beta then return beta (cut off)
-            //return beta (this is the opponent's best move)
+                        
             if (parent.GetChildren().Count > 0)
             {
                 GameBoard worst_child = parent.GetChildren().ElementAt(0);
@@ -319,11 +308,9 @@ namespace Assignment457
                     {
                         worst_child = child;
                         parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
-                    }
-                    //Console.Write(child.GetAlphaBetaValue().ToString() + ", ");
+                    }                   
                 }
 
-                //Console.WriteLine("Min Value: " + worst_child.GetAlphaBetaValue().ToString());
                 return worst_child;
             }
 
