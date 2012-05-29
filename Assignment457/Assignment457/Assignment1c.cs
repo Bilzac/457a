@@ -16,6 +16,7 @@ namespace Assignment457
 
         public void RunPartC()
         {
+            Console.WriteLine();
             Console.WriteLine("Search Agent - Tabu search");
 
             int[,] distanceMatrix = new int[21,21] 
@@ -129,8 +130,8 @@ namespace Assignment457
                     int depB = departments[bestCandidate.x];
 
                     // set tenure
-                    tabuList[depA, siteA] = 10; 
-                    tabuList[depB, siteB] = 10;
+                    tabuList[depA, siteA] = 5; 
+                    tabuList[depB, siteB] = 5;
 
                     // set dynamic tabu list
                     //setTenure(tabuList, siteA, siteB, depA, depB);
@@ -141,13 +142,26 @@ namespace Assignment457
                 }
             }
 
-            Console.WriteLine("The best Solution is " + bestSolution);
-            for (int i = 0; i < departments.Length; i++)
-            {
-                Console.Write(departments[i] + ", ");
-            }
-
+            Console.WriteLine("The best Solution is " + bestSolution + ".");
+            Console.WriteLine("Order: " + convToString(departments[1]) + "  " + convToString(departments[2]) + "  "
+                                        + convToString(departments[3]) + "  " + convToString(departments[4]));
+            Console.WriteLine("       " + convToString(departments[5]) + "  " + convToString(departments[6]) + "  "
+                                        + convToString(departments[7]) + "  " + convToString(departments[8]));
+            Console.WriteLine("       " + convToString(departments[9]) + "  " + convToString(departments[10]) + "  "
+                                        + convToString(departments[11]) + "  " + convToString(departments[12]));
+            Console.WriteLine("       " + convToString(departments[13]) + "  " + convToString(departments[14]) + "  "
+                                        + convToString(departments[15]) + "  " + convToString(departments[16]));
+            Console.WriteLine("       " + convToString(departments[17]) + "  " + convToString(departments[18]) + "  "
+                                        + convToString(departments[19]) + "  " + convToString(departments[20]));
             Console.WriteLine();
+        }
+
+        public string convToString(int i)
+        {
+            if ((i / 10) > 0)
+                return i.ToString();
+            else
+                return " " + i;
         }
 
         public void resetTabuList(int[,] tabuList)
