@@ -23,6 +23,8 @@ namespace Assignment457
             Console.WriteLine("Search Agent - Alpha/Beta Pruning"); 
 
             timer.Start();
+            //MinimaxSearch(); 
+
             AlphaBetaSearch(); 
             timer.Stop(); 
             Console.WriteLine(timer.Elapsed.ToString()); 
@@ -32,17 +34,87 @@ namespace Assignment457
             return; 
         }
 
-
         static void AlphaBetaSearch()
         {
+            GameBoard parent = new GameBoard();
+            parent.SetNodeType(GameBoard.MinMax.Min);
+            int total_moves = 0;
+
+            Console.WriteLine("Starting move:");
+            displayBoard(parent);
+
+            bool turn = false; //turn 0 = player's turn(black,min), turn 1 = our turn(white,max)
+            GameBoard next_move = null;
+
+            while (CalculateMoves(parent) != 0 && total_moves < 5000)
+            {
+                if (turn == false)//their turn (BLACK)
+                {
+                    Console.WriteLine("Their Move / Player 1");
+                    //next_move = CalculateBeta(parent);
+
+                    //Random moves :(
+                    //choose random child
+
+                    Random random_number = new Random();
+                    int black_move = random_number.Next(parent.GetChildren().Count - 1);
+
+                    next_move = parent.GetChildren().ElementAt(black_move);
+                    parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
+
+                    turn = true;
+                }
+                else //my move (WHITE)
+                {
+                    Console.WriteLine("My Move / Player 2");
+
+                    //next_move = null;
+                    int best = -1;                    
+
+                    CalculateMoves(parent);
+
+                    foreach (GameBoard child in parent.GetChildren())
+                    {
+                        CalculateAlphaBeta(child, 5, -1000, 1000, GameBoard.MinMax.Max);
+                        if (child.GetAlphaBetaValue() >= best)
+                        {
+                            best = child.GetAlphaBetaValue();
+                            next_move = child; 
+                        }
+                    }
+
+                    parent.SetAlphaBetaValue(best); 
+
+                    turn = false; 
+                }
+                //each move
+                Console.WriteLine("Move #: " + total_moves);
+                displayBoard(next_move);
+                parent = next_move;
+                total_moves++;
+                
+            }
+
+            //WINNER
+            if (next_move.GetNodeType() == GameBoard.MinMax.Max)
+            {
+                Console.WriteLine("Player 1 wins");
+            }
+            else
+            {
+                Console.WriteLine("Computer wins");
+            }
+        }
 
 
+        static void MinimaxSearch()
+        {
             /*
             alpha-beta(player,board,alpha,beta)
-    if(game over in current board position)
-        return winner
+            if(game over in current board position)
+                return winner
 
-    children = all legal moves for player from this board
+            children = all legal moves for player from this board
     
     
                     */
@@ -74,7 +146,7 @@ namespace Assignment457
             {   
                 if (turn == false)//their turn (BLACK)
                 {                    
-                    Console.WriteLine("Their Move / Player 1");
+                    Console.WriteLine("Black - Their Move / Player 1");
                     //next_move = CalculateBeta(parent);
 
                     //Random moves :(
@@ -90,17 +162,17 @@ namespace Assignment457
                 }
                 else //my move (WHITE)
                 {                    
-                    Console.WriteLine("My Move / Player 2");
-                    GameBoard start_move = CalculateAlpha(parent); //current node is a beta
+                    Console.WriteLine("White - My Move / Player 2");
+                    GameBoard start_move = CalculateMaxMove(parent); //current node is a beta
                     next_move = start_move; 
                     GameBoard next_move_tmp = null;                    
                     int counter = 0;
                     
-                    while (counter < 3)
+                    while (counter < 10)
                     {
                         next_move_tmp = next_move; 
                         CalculateMoves(next_move);
-                        next_move = CalculateBeta(next_move); //get worst for opponent move from children
+                        next_move = CalculateMinMove(next_move); //get worst for opponent move from children
                         //next_move_tmp = next_move; 
 
                         if (next_move == null)
@@ -111,7 +183,7 @@ namespace Assignment457
 
                         next_move_tmp = next_move; 
                         CalculateMoves(next_move);
-                        next_move = CalculateAlpha(next_move); //get best move from children
+                        next_move = CalculateMaxMove(next_move); //get best move from children
 
                         if (next_move == null)
                         {
@@ -138,7 +210,7 @@ namespace Assignment457
             }
 
             //WINNER
-            if (turn == true)
+            if (next_move.GetNodeType() == GameBoard.MinMax.Max)
             {
                 Console.WriteLine("Player 1 wins");
             }
@@ -148,7 +220,48 @@ namespace Assignment457
             }
         }
 
-        static GameBoard CalculateAlpha(GameBoard parent)
+
+        static int CalculateAlphaBeta(GameBoard parent, int depth, int alpha, int beta, GameBoard.MinMax player)
+        {
+            
+            int moves = CalculateMoves(parent); 
+            if (moves == 0 || depth == 0) //terminal node
+            {
+                return 10000;
+            }
+
+            if (player == GameBoard.MinMax.Max) //max player
+            {
+                foreach (GameBoard child in parent.GetChildren())
+                {
+                    alpha = Math.Max(alpha, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Max)); 
+                    child.SetAlphaBetaValue(alpha); 
+                    if(beta <= alpha)
+                    {
+                        break; 
+                    }
+                    return alpha; 
+                }
+            }
+            else
+            {
+                foreach (GameBoard child in parent.GetChildren())
+                {
+                    beta = Math.Min(beta, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Min));
+                    child.SetAlphaBetaValue(beta); 
+                    if (beta <= alpha)
+                    {
+                        break; 
+                    }
+                    return beta; 
+                }
+            }
+            return 0; 
+        }
+
+        
+
+        static GameBoard CalculateMaxMove(GameBoard parent)
         {
             /* Alpha values are stored in the max nodes
              * Alpha value = max(children's Beta Values of min nodes)
@@ -176,13 +289,13 @@ namespace Assignment457
                    // Console.Write(child.GetAlphaBetaValue().ToString() + ", ");
                 }
 
-                Console.WriteLine("Alpha Value: " + best_child.GetAlphaBetaValue().ToString());
+                //Console.WriteLine("Max Value: " + best_child.GetAlphaBetaValue().ToString());
                 return best_child;
             }
             return null; 
         }
 
-        static GameBoard CalculateBeta(GameBoard parent)
+        static GameBoard CalculateMinMove(GameBoard parent)
         {
             /* Beta values are stored in the min nodes
              * Beta value = min(alpha Values of max nodes)
@@ -210,7 +323,7 @@ namespace Assignment457
                     //Console.Write(child.GetAlphaBetaValue().ToString() + ", ");
                 }
 
-                Console.WriteLine("Beta Value: " + worst_child.GetAlphaBetaValue().ToString());
+                //Console.WriteLine("Min Value: " + worst_child.GetAlphaBetaValue().ToString());
                 return worst_child;
             }
 
