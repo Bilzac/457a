@@ -234,7 +234,7 @@ namespace Assignment457
             {
                 foreach (GameBoard child in parent.GetChildren())
                 {
-                    alpha = Math.Max(alpha, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Max)); 
+                    alpha = Math.Max(alpha, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Min)); 
                     child.SetAlphaBetaValue(alpha); 
                     if(beta <= alpha)
                     {
@@ -247,7 +247,7 @@ namespace Assignment457
             {
                 foreach (GameBoard child in parent.GetChildren())
                 {
-                    beta = Math.Min(beta, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Min));
+                    beta = Math.Min(beta, CalculateAlphaBeta(child, depth-1, alpha, beta, GameBoard.MinMax.Max));
                     child.SetAlphaBetaValue(beta); 
                     if (beta <= alpha)
                     {
