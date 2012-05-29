@@ -20,17 +20,30 @@ namespace Assignment457
 
         public void RunPartB()
         {
-            Console.WriteLine("Search Agent - Alpha/Beta Pruning"); 
+            Console.WriteLine("CONGA GAME: COMPUTER VS. RANDOM AGENT");
+            Console.WriteLine("Select: \n[A] Alpha-Beta Pruning \n[B] Minimax");            
+            char choice = Console.ReadLine().ToLower().ToCharArray()[0];
 
-            timer.Start();
-            //MinimaxSearch(); 
-
-            AlphaBetaSearch(); 
-            timer.Stop(); 
-            Console.WriteLine(timer.Elapsed.ToString()); 
-            timer.Reset();
-
-            
+            switch (choice)
+            {
+                case 'a':
+                    timer.Start();            
+                    AlphaBetaSearch(); 
+                    timer.Stop(); 
+                    Console.WriteLine(timer.Elapsed.ToString()); 
+                    timer.Reset();
+                    break; 
+                case 'b':
+                    timer.Start();            
+                    MinimaxSearch(); 
+                    timer.Stop(); 
+                    Console.WriteLine(timer.Elapsed.ToString()); 
+                    timer.Reset();                     
+                    break; 
+                default:
+                    Console.WriteLine("Invalid selection"); 
+                    break; 
+            }
             return; 
         }
 
@@ -113,17 +126,15 @@ namespace Assignment457
             alpha-beta(player,board,alpha,beta)
             if(game over in current board position)
                 return winner
-
-            children = all legal moves for player from this board
-    
-    
-                    */
-            //GameBoard parent = new GameBoard(GameBoard.MinMax.Min, null); //player starts
+            children = all legal moves for player from this board       
+            */
+            
+            //starting game position (default)
             GameBoard parent = new GameBoard();
             parent.SetNodeType(GameBoard.MinMax.Min);
             int total_moves = 0; 
             /*
-            //random game//
+            //forced loss test
             parent.SetStones(0, 0, 10, Colour.WHITE);
             parent.SetStones(1, 0, 3, Colour.BLACK);
             parent.SetStones(0, 1, 3, Colour.BLACK);
@@ -138,11 +149,8 @@ namespace Assignment457
             bool turn = false; //turn 0 = player's turn(black,min), turn 1 = our turn(white,max)
             GameBoard next_move = null;
 
-            //bool turn = true; 
-
-            //CalculateMoves(parent); 
-
-            while(CalculateMoves(parent) != 0 && total_moves < 1000)
+            //while we still have moves left, or haven't played over 1000 moves
+            while(CalculateMoves(parent) != 0 && total_moves < 5000)
             {   
                 if (turn == false)//their turn (BLACK)
                 {                    
@@ -323,7 +331,7 @@ namespace Assignment457
              * on a gameboard
              * returns number of moves
              */
-
+            
             int moves = 0; 
 
             Colour player_colour = Colour.NONE;

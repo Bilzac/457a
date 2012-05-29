@@ -72,8 +72,8 @@ namespace Assignment457
             //exit_node.SetCoordinates(24, 24);
 
             //TEST FAIL
-            start_node.SetCoordinates(0, 24);
-            exit_node.SetCoordinates(24, 24);
+            //start_node.SetCoordinates(0, 24);
+            //exit_node.SetCoordinates(24, 24);
 
 
             /* * List of All Nodes and their status
@@ -258,13 +258,6 @@ namespace Assignment457
                         }
                     }
                 }
-
-                if (node_queue.Count > 1000) //random break so that we don't have infinite loop
-                {
-                    //didn't find solution :(
-                    break;
-                }
-
             }
             return false;
         }
