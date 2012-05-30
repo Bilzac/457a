@@ -10,9 +10,7 @@ namespace Assignment457
         // Private variables
         int _x;
         int _y;
-        int _solution;
-        int _tenure;
-        bool _isInitialized;
+        int _cost;
 
         // Public getters
         public int x 
@@ -23,27 +21,16 @@ namespace Assignment457
         {
             get { return this._y; }
         }
-        public int solution 
+        public int cost 
         {
-            get { return this._solution; }
-        }
-        public bool isInitialized
-        {
-            get { return this._isInitialized; }
-        }
-
-        // Constructor
-        public Pair()
-        {
-            _isInitialized = false;
+            get { return this._cost; }
         }
         
-        public Pair(int x, int y, int solution, bool isInitialized)
+        public Pair(int x, int y, int cost)
         {
             _x = x;
             _y = y;
-            _solution = solution;
-            _isInitialized = true;
+            _cost = cost;
         }
     }
 }

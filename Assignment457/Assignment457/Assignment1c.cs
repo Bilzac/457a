@@ -7,12 +7,9 @@ namespace Assignment457
 {
     class Assignment1c
     {
-        private const int MOVE_FREQUENCY_LIMIT = 100;
+        private const int MOVE_FREQUENCY_LIMIT = 50;
 
-        public Assignment1c()
-        {
-
-        }
+        public Assignment1c() {   }
 
         public void RunPartC()
         {
@@ -77,17 +74,18 @@ namespace Assignment457
         public void doTabuSearch(int [,] distanceMatrix, int[,] flowMatrix)
         {
             // department[i] = department, i = location
-            int[] departments = new int[21] 
+            // Initial solution
+            int[] departments = new int[21]
                 {  
                     0,  // ignore
                     1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20 
                 };
 
-            // get initial solution 
-            int currentSolution = computeSolution(departments, distanceMatrix, flowMatrix);
-            int bestSolution = currentSolution;
-            Console.WriteLine(currentSolution);
+            // get initial cost 
+            int currentCost = computeCost(departments, distanceMatrix, flowMatrix);
+            int bestCost = currentCost;
+            Console.WriteLine("Cost: " + currentCost + ", iter: 0");
 
             // create tabu list
             int[,] tabuList = new int[21, 21];
@@ -95,9 +93,9 @@ namespace Assignment457
             // create list to store the frequency of the moves
             int[,] frequencyList = new int[21, 21];
 
-            // find optimal solution
+            // find optimal cost
             int counter = 0;
-            while (counter < 2000) // stop after 2000 iterations
+            while (counter < 1000 && bestCost > 2570) // stop after 2000 iterations or if the optimal cost is found
             {
                 counter++;
 
@@ -105,24 +103,24 @@ namespace Assignment457
                 resetTabuList(tabuList);
 
                 // Get sorted candidate list
-                List<Pair> candidatePairs = getAllCandidatesFromNeighbourhood(tabuList, frequencyList, departments, bestSolution, distanceMatrix, flowMatrix);
+                List<Pair> candidatePairs = getAllCandidatesFromNeighbourhood(tabuList, frequencyList, departments, bestCost, distanceMatrix, flowMatrix);
 
                 // make sure that the the candidates list is not empty
                 if (candidatePairs.Count > 0)
                 {
-                    // get the solution of the best candidate
+                    // get the candidate that gives the best solution
                     Pair bestCandidate = candidatePairs.ElementAt(0);
 
-                    // if the swap improves the solution, save it as best solution
-                    if (bestCandidate.solution < bestSolution)
+                    // if the swap improves the cost, save it as best cost
+                    if (bestCandidate.cost < bestCost)
                     {
-                        bestSolution = bestCandidate.solution;
-                        Console.WriteLine(bestCandidate.solution + ", iter: " + counter + ", swapped (" + bestCandidate.x + "," + bestCandidate.y +")" );
+                        bestCost = bestCandidate.cost;
+                        Console.WriteLine("Cost: " + bestCandidate.cost + ", iter: " + counter + ", swapped (" + bestCandidate.x + "," + bestCandidate.y +")" );
                     }
 
-                    // save ordering
+                    // save solution
                     departments = swapValues(departments, bestCandidate.x, bestCandidate.y);
-                    currentSolution = bestCandidate.solution;
+                    currentCost = bestCandidate.cost;
 
                     int siteA = bestCandidate.x;
                     int siteB = bestCandidate.y;
@@ -130,8 +128,8 @@ namespace Assignment457
                     int depB = departments[bestCandidate.x];
 
                     // set tenure
-                    tabuList[depA, siteA] = 5; 
-                    tabuList[depB, siteB] = 5;
+                    tabuList[depA, siteA] = 9; 
+                    tabuList[depB, siteB] = 9;
 
                     // set dynamic tabu list
                     //setTenure(tabuList, siteA, siteB, depA, depB);
@@ -142,17 +140,17 @@ namespace Assignment457
                 }
             }
 
-            Console.WriteLine("The best Solution is " + bestSolution + ".");
-            Console.WriteLine("Order: " + convToString(departments[1]) + "  " + convToString(departments[2]) + "  "
-                                        + convToString(departments[3]) + "  " + convToString(departments[4]));
-            Console.WriteLine("       " + convToString(departments[5]) + "  " + convToString(departments[6]) + "  "
-                                        + convToString(departments[7]) + "  " + convToString(departments[8]));
-            Console.WriteLine("       " + convToString(departments[9]) + "  " + convToString(departments[10]) + "  "
-                                        + convToString(departments[11]) + "  " + convToString(departments[12]));
-            Console.WriteLine("       " + convToString(departments[13]) + "  " + convToString(departments[14]) + "  "
-                                        + convToString(departments[15]) + "  " + convToString(departments[16]));
-            Console.WriteLine("       " + convToString(departments[17]) + "  " + convToString(departments[18]) + "  "
-                                        + convToString(departments[19]) + "  " + convToString(departments[20]));
+            Console.WriteLine("The best cost is " + bestCost + ".");
+            Console.WriteLine("Solution: " + convToString(departments[1]) + "  " + convToString(departments[2]) + "  "
+                                           + convToString(departments[3]) + "  " + convToString(departments[4]));
+            Console.WriteLine("          " + convToString(departments[5]) + "  " + convToString(departments[6]) + "  "
+                                           + convToString(departments[7]) + "  " + convToString(departments[8]));
+            Console.WriteLine("          " + convToString(departments[9]) + "  " + convToString(departments[10]) + "  "
+                                           + convToString(departments[11]) + "  " + convToString(departments[12]));
+            Console.WriteLine("          " + convToString(departments[13]) + "  " + convToString(departments[14]) + "  "
+                                           + convToString(departments[15]) + "  " + convToString(departments[16]));
+            Console.WriteLine("          " + convToString(departments[17]) + "  " + convToString(departments[18]) + "  "
+                                           + convToString(departments[19]) + "  " + convToString(departments[20]));
             Console.WriteLine();
         }
 
@@ -190,7 +188,7 @@ namespace Assignment457
         // Use less than the whole neighbourhood to select the next solution
         public List<Pair> getSomeCandidatesFromNeighbourhood(
             int[,] tabuList, int[,] frequencyList,
-            int[] departments, int bestSolution, 
+            int[] departments, int bestCost, 
             int[,] distanceMatrix, int[,] flowMatrix)
         {
             Random random = new Random();
@@ -212,14 +210,14 @@ namespace Assignment457
                     if (!usedMoveToManyTimes(frequencyList, i, j, departments[i], departments[j]))
                     {
                         int[] newDepartments = swapValues(departments, i, j);
-                        int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
-                        Pair pair = new Pair(i, j, solution, true);
+                        int cost = computeCost(newDepartments, distanceMatrix, flowMatrix);
+                        Pair pair = new Pair(i, j, cost);
 
                         if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
                         {
                             // Aspiration Condition - A tabu move will be considered only if it 
                             // provides a better solution than the best solution previously computed 
-                            if (solution < bestSolution)
+                            if (cost < bestCost)
                                 list.Add(pair);
                         }
                         else
@@ -231,14 +229,14 @@ namespace Assignment457
             // Aspiration Criteria - Order list with the best solution first. This
             // means that the best solution from the neighbourhood is always selected.
             var query = from pair in list
-                        orderby pair.solution ascending
+                        orderby pair.cost ascending
                         select pair;
             return query.ToList();
         }
 
         public List<Pair> getAllCandidatesFromNeighbourhood(
             int[,] tabuList, int[,] frequencyList,
-            int[] departments, int bestSolution, 
+            int[] departments, int bestCost, 
             int[,] distanceMatrix, int[,] flowMatrix)
         {
             List<Pair> list = new List<Pair>();
@@ -249,14 +247,14 @@ namespace Assignment457
                     if (!usedMoveToManyTimes(frequencyList, i, j, departments[i], departments[j]))
                     {
                         int[] newDepartments = swapValues(departments, i, j);
-                        int solution = computeSolution(newDepartments, distanceMatrix, flowMatrix);
-                        Pair pair = new Pair(i, j, solution, true);
+                        int cost = computeCost(newDepartments, distanceMatrix, flowMatrix);
+                        Pair pair = new Pair(i, j, cost);
 
                         if (isInTabuList(tabuList, i, j, departments[i], departments[j]))
                         {
                             // Aspiration Criteria - A tabu move will be considered only if it 
                             // provides a better solution than the best solution previously computed 
-                            if (solution < bestSolution)
+                            if (cost < bestCost)
                                 list.Add(pair);
                         }
                         else
@@ -270,7 +268,7 @@ namespace Assignment457
             // Aspiration Criteria - Order list with the best solution first. This
             // means that the best solution from the neighbourhood is always selected.
             var query = from pair in list
-                        orderby pair.solution ascending
+                        orderby pair.cost ascending
                         select pair;
             return query.ToList();
         }
@@ -308,9 +306,9 @@ namespace Assignment457
             return newList;
         }
 
-        public int computeSolution(int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
+        public int computeCost(int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
         {
-            // find initial solution
+            // compute cost
             int solution = 0;
             for (int i = 1; i < departments.Length; i++)
             {
