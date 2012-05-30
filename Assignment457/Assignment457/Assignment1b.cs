@@ -88,7 +88,7 @@ namespace Assignment457
 
                     foreach (GameBoard child in parent.GetChildren())
                     {
-                        CalculateAlphaBeta(child, 5, -100000, 100000, GameBoard.MinMax.Min);
+                        CalculateAlphaBeta(child, 3, -100000, 100000, GameBoard.MinMax.Min);
                                                 
                         if (child.GetAlphaBetaValue() <= best)
                         {
@@ -96,7 +96,8 @@ namespace Assignment457
                             next_move = child; 
                         }
                     }
-                    parent.SetAlphaBetaValue(best); 
+                    parent.SetAlphaBetaValue(best);
+                    System.GC.Collect();
 
                     turn = false; 
                 }
@@ -250,8 +251,8 @@ namespace Assignment457
                     {
                         break; 
                     }
-                    return alpha; 
                 }
+                return alpha;
             }
             else //min player
             {
@@ -264,8 +265,8 @@ namespace Assignment457
                     {
                         break; 
                     }
-                    return beta; 
                 }
+                return beta;
             }
             return 0; 
         }
