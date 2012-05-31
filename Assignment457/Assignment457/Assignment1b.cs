@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Diagnostics; 
+using System.Diagnostics;
+using System.Collections.ObjectModel; 
 
 namespace Assignment457
 {
@@ -106,18 +107,29 @@ namespace Assignment457
 
                     //the parent is a max node (next_move)
                     //the children are min nodes
-                    
+                    Collection<GameBoard> potentialMoves = new Collection<GameBoard>();
+
                     foreach (GameBoard child in parent.GetChildren())
                     {
-                        CalculateAlphaBeta(child, 4, -100000, 100000, GameBoard.MinMax.Min);
+                        CalculateAlphaBeta(child, 3, -100000, best, GameBoard.MinMax.Min);
                                                 
-                        if (child.GetAlphaBetaValue() <= best)
+                        if (child.GetAlphaBetaValue() < best)
                         {   
                             best = child.GetAlphaBetaValue();
-                            next_move = child; 
+                            potentialMoves.Clear();
+                            potentialMoves.Add(child);
+                        }
+                        else if (child.GetAlphaBetaValue() == best)
+                        {
+                            potentialMoves.Add(child);
                         }
                     }
-             
+
+                    Random random_number = new Random();
+                    int white_move = random_number.Next(potentialMoves.Count - 1);
+                    next_move = potentialMoves.ElementAt(white_move);
+                    
+                    potentialMoves.Clear();
                     parent.SetAlphaBetaValue(best);
                     //System.GC.Collect();
 
