@@ -175,14 +175,26 @@ namespace Assignment457
             GameBoard next_move = null;
 
             //while we still have moves left, or haven't played over 1000 moves
-            while(CalculateMoves(parent) != 0 && total_moves < 5000)
+            while(total_moves < 5000)
             {   
                 if (turn == false)//their turn (BLACK)
                 {                    
                     Console.WriteLine("Black - Their Move / Player 1");                    
 
                     //Random moves :(
-                    //choose random child
+                    //choose random child                    
+                    int moves = parent.GetChildren().Count;
+                    if (moves <= 0)
+                    {
+                        moves = CalculateMoves(parent);
+                    }
+                    
+                    
+                    //player 2 wins
+                    if (moves == 0)
+                    {
+                        break; 
+                    }
 
                     Random random_number = new Random();
                     int black_move = random_number.Next(parent.GetChildren().Count - 1); 
@@ -195,40 +207,59 @@ namespace Assignment457
                 else //my move (WHITE)
                 {                    
                     Console.WriteLine("White - My Move / Player 2");
-                    GameBoard start_move = parent; // CalculateMaxMove(parent); //current node is a beta
-                    next_move = start_move; 
-                    GameBoard next_move_tmp = start_move;                    
+                    //GameBoard start_move = parent; // CalculateMaxMove(parent); //current node is a beta
+                    next_move = parent; 
+                    //GameBoard next_move_tmp = start_move;                    
                     int counter = 0;
                     
-                    while (counter < 10)
-                    {                        
-                        CalculateMoves(next_move);
-                        next_move_tmp = next_move; 
-                        next_move = CalculateMaxMove(next_move); //get best for my move from children                        
-
-                        if (next_move == null)
+                    //iterative deepening
+                    int internal_counter = 1; 
+                    
+                    while (internal_counter > counter)
+                    {
+                        int moves = 0;
+                        if (next_move.GetChildren().Count > 0)
                         {
-                            next_move = next_move_tmp;  
-                            break;
+                            moves = next_move.GetChildren().Count;
                         }
-                                                
-                        CalculateMoves(next_move);
-                        next_move_tmp = next_move; 
-                        next_move = CalculateMinMove(next_move); //get worst move from children for opponent
-
-                        if (next_move == null)
+                        else
                         {
-                            next_move = next_move_tmp;
-                            break;
+                            moves = CalculateMoves(next_move);
                         }
 
+                        //player 1 wins-need to avoid
+                        if (moves == 0)
+                        {
+                            break;
+                        }
+
+                        if (parent.GetNodeType() == GameBoard.MinMax.Min)
+                        {
+                            if (CalculateMaxMove(next_move) == null) //end node
+                            {
+                                break;
+                            }
+                            next_move = CalculateMaxMove(next_move); 
+                        }
+                        else
+                        {
+                            if (CalculateMinMove(next_move) == null) //end node
+                            {
+                                break;
+                            }
+                            next_move = CalculateMinMove(next_move); 
+                        }
                         counter++;
+
+                        if (counter == internal_counter && internal_counter < 50) //deepen search
+                        {
+                            internal_counter = internal_counter + 1; 
+                        }
                     }
 
-                    while (next_move.GetParent() != start_move)
+                    while (next_move.GetParent().GetParent() != null)
                     {
                         next_move = next_move.GetParent();
-                        //displayBoard(next_move); 
                     }
                     
                     turn = false; 
@@ -238,8 +269,8 @@ namespace Assignment457
                 displayBoard(next_move);
                 parent = next_move;
                 total_moves++;
-                next_move.SetParent(null);
-                System.GC.Collect(); 
+                next_move.SetParent(null); //get rid of useless nodes
+                System.GC.Collect();        // parent is always root node
 
             }
 
