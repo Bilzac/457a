@@ -55,11 +55,12 @@ namespace Assignment457
 
             Console.WriteLine("Starting move:");
             displayBoard(parent);
+            CalculateMoves(parent); 
 
             bool turn = false; //turn 0 = player's turn(black,min), turn 1 = our turn(white,max)
-            GameBoard next_move = null;
+            GameBoard next_move = parent;
 
-            while (CalculateMoves(parent) != 0 && total_moves < 5000)
+            while (total_moves < 5000)
             {
                 if (turn == false)//their turn (BLACK)
                 {
@@ -68,12 +69,21 @@ namespace Assignment457
 
                     //Random Agent :(
                     //choose random child
+
+                    if (parent.GetChildren().Count <= 0)
+                    {
+                        CalculateMoves(parent); 
+                    }
+
+                    if (parent.GetChildren().Count <= 0)
+                    {
+                        break; //win condition for player 2
+                    }
+
                     Random random_number = new Random();
                     int black_move = random_number.Next(parent.GetChildren().Count - 1);
 
                     next_move = parent.GetChildren().ElementAt(black_move);
-                    //parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
-
                     turn = true;
                 }
                 else //my move (WHITE)
@@ -81,21 +91,33 @@ namespace Assignment457
                     Console.WriteLine("My Move / Player 2");
 
                     //next_move = null;
-                    int best = 10000;                    
+                    int best = 100000;
+
+                    if (parent.GetChildren().Count <= 0)
+                    {
+                        CalculateMoves(parent);
+                    }
+
+                    if (parent.GetChildren().Count <= 0)
+                    {
+                        break; //win condition for player 1
+                    }
+
 
                     //the parent is a max node (next_move)
                     //the children are min nodes
-
+                    
                     foreach (GameBoard child in parent.GetChildren())
                     {
                         CalculateAlphaBeta(child, 3, -100000, 100000, GameBoard.MinMax.Min);
                                                 
                         if (child.GetAlphaBetaValue() <= best)
-                        {
+                        {   
                             best = child.GetAlphaBetaValue();
                             next_move = child; 
                         }
                     }
+             
                     parent.SetAlphaBetaValue(best);
                     System.GC.Collect();
 
@@ -106,7 +128,9 @@ namespace Assignment457
                 displayBoard(next_move);
                 parent = next_move;
                 total_moves++;
-                
+                next_move.SetParent(null);
+                System.GC.Collect(); 
+
             }
 
             //WINNER
@@ -155,8 +179,7 @@ namespace Assignment457
             {   
                 if (turn == false)//their turn (BLACK)
                 {                    
-                    Console.WriteLine("Black - Their Move / Player 1");
-                    //next_move = CalculateBeta(parent);
+                    Console.WriteLine("Black - Their Move / Player 1");                    
 
                     //Random moves :(
                     //choose random child
@@ -165,34 +188,33 @@ namespace Assignment457
                     int black_move = random_number.Next(parent.GetChildren().Count - 1); 
 
                     next_move = parent.GetChildren().ElementAt(black_move);
-                    parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
+                    //parent.SetAlphaBetaValue(next_move.GetAlphaBetaValue());
 
                     turn = true; 
                 }
                 else //my move (WHITE)
                 {                    
                     Console.WriteLine("White - My Move / Player 2");
-                    GameBoard start_move = CalculateMaxMove(parent); //current node is a beta
+                    GameBoard start_move = parent; // CalculateMaxMove(parent); //current node is a beta
                     next_move = start_move; 
-                    GameBoard next_move_tmp = null;                    
+                    GameBoard next_move_tmp = start_move;                    
                     int counter = 0;
                     
                     while (counter < 10)
-                    {
-                        next_move_tmp = next_move; 
+                    {                        
                         CalculateMoves(next_move);
-                        next_move = CalculateMinMove(next_move); //get worst for opponent move from children
-                        //next_move_tmp = next_move; 
+                        next_move_tmp = next_move; 
+                        next_move = CalculateMaxMove(next_move); //get best for my move from children                        
 
                         if (next_move == null)
                         {
                             next_move = next_move_tmp;  
                             break;
                         }
-
-                        next_move_tmp = next_move; 
+                                                
                         CalculateMoves(next_move);
-                        next_move = CalculateMaxMove(next_move); //get best move from children
+                        next_move_tmp = next_move; 
+                        next_move = CalculateMinMove(next_move); //get worst move from children for opponent
 
                         if (next_move == null)
                         {
@@ -215,7 +237,10 @@ namespace Assignment457
                 Console.WriteLine("Move #: " + total_moves);                 
                 displayBoard(next_move);
                 parent = next_move;
-                total_moves++; 
+                total_moves++;
+                next_move.SetParent(null);
+                System.GC.Collect(); 
+
             }
 
             //WINNER
@@ -232,14 +257,21 @@ namespace Assignment457
 
         static int CalculateAlphaBeta(GameBoard parent, int depth, int alpha, int beta, GameBoard.MinMax player)
         {
-            
-            int moves = CalculateMoves(parent); 
-            if (moves == 0 || depth == 0) //terminal node
+            int moves = 0; 
+            if (parent.GetChildren().Count == 0) //if there are no children for this node
             {
-                //return parent.GetAlphaBetaValue(); --also works???
-                return 10000; 
+                moves = CalculateMoves(parent);
+            }
+            else
+            {
+                moves = parent.GetChildren().Count; 
             }
 
+            if (moves == 0 || depth == 0) //terminal node
+            {
+                return parent.GetAlphaBetaValue(); //return non null value                
+            }
+            
             if (player == GameBoard.MinMax.Max) //max player
             {
                 foreach (GameBoard child in parent.GetChildren())
@@ -251,7 +283,7 @@ namespace Assignment457
                     {
                         break; 
                     }
-                }
+                }            
                 return alpha;
             }
             else //min player
@@ -267,8 +299,7 @@ namespace Assignment457
                     }
                 }
                 return beta;
-            }
-            return 0; 
+            }            
         }
 
         
@@ -279,11 +310,10 @@ namespace Assignment457
              * Alpha value = max(children's Beta Values of min nodes)
              * Because we want to minimize opponent moves             * 
              */           
-
+            GameBoard best_child = null; 
             if (parent.GetChildren().Count > 0)
             {
-
-                GameBoard best_child = parent.GetChildren().ElementAt(0); //best is first child
+                 best_child = parent.GetChildren().ElementAt(0); //best is first child
 
                 foreach (GameBoard child in parent.GetChildren())
                 {
@@ -306,10 +336,11 @@ namespace Assignment457
              * Because we want to maximize our moves
              * 
              */
-                        
+            GameBoard worst_child = null; 
+
             if (parent.GetChildren().Count > 0)
             {
-                GameBoard worst_child = parent.GetChildren().ElementAt(0);
+               worst_child = parent.GetChildren().ElementAt(0);
 
                 foreach (GameBoard child in parent.GetChildren())
                 {
@@ -319,10 +350,8 @@ namespace Assignment457
                         parent.SetAlphaBetaValue(worst_child.GetAlphaBetaValue());
                     }                   
                 }
-
                 return worst_child;
-            }
-
+            } 
             return null; 
         }
 
@@ -536,8 +565,24 @@ namespace Assignment457
                 }
             }
             //store moves in parent
-            board.SetAlphaBetaValue(moves); 
-            return moves; 
+            /* int squares = 0; 
+             for (int x = 0; x < 4; x++)
+             {
+                 for (int y = 0; y < 4; y++)
+                 {
+                     if (board.ReturnPosition(x, y).colour == player_colour)
+                     {
+                         squares++; 
+                     }
+                 }
+
+             }
+             board.SetAlphaBetaValue(squares);
+             return squares; 
+             */
+             board.SetAlphaBetaValue(moves); 
+             return moves;              
+
         }
 
 
