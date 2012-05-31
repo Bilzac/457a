@@ -109,7 +109,7 @@ namespace Assignment457
                     
                     foreach (GameBoard child in parent.GetChildren())
                     {
-                        CalculateAlphaBeta(child, 3, -100000, 100000, GameBoard.MinMax.Min);
+                        CalculateAlphaBeta(child, 4, -100000, 100000, GameBoard.MinMax.Min);
                                                 
                         if (child.GetAlphaBetaValue() <= best)
                         {   
@@ -119,7 +119,7 @@ namespace Assignment457
                     }
              
                     parent.SetAlphaBetaValue(best);
-                    System.GC.Collect();
+                    //System.GC.Collect();
 
                     turn = false; 
                 }
@@ -187,8 +187,7 @@ namespace Assignment457
                     if (moves <= 0)
                     {
                         moves = CalculateMoves(parent);
-                    }
-                    
+                    }                    
                     
                     //player 2 wins
                     if (moves == 0)
@@ -213,7 +212,7 @@ namespace Assignment457
                     int counter = 0;
                     
                     //iterative deepening
-                    int internal_counter = 1; 
+                    int internal_counter = 1; //keep adding one more iteration
                     
                     while (internal_counter > counter)
                     {
@@ -274,6 +273,13 @@ namespace Assignment457
 
             }
 
+            //TIE
+            if (next_move.GetChildren().Count > 0)
+            {
+                Console.WriteLine("NO winner. Try again..."); 
+            }
+
+
             //WINNER
             if (next_move.GetNodeType() == GameBoard.MinMax.Max)
             {
@@ -312,6 +318,7 @@ namespace Assignment457
                     child.SetAlphaBetaValue(alpha); 
                     if(beta <= alpha)
                     {
+                        parent.GetChildren().Remove(child); 
                         break; 
                     }
                 }            
@@ -326,6 +333,7 @@ namespace Assignment457
                     child.SetAlphaBetaValue(beta); 
                     if (beta <= alpha)
                     {
+                        parent.GetChildren().Remove(child); 
                         break; 
                     }
                 }
@@ -340,7 +348,12 @@ namespace Assignment457
             /* Alpha values are stored in the max nodes
              * Alpha value = max(children's Beta Values of min nodes)
              * Because we want to minimize opponent moves             * 
-             */           
+             */
+            if (parent.GetChildren().Count <= 0)
+            {
+                CalculateMoves(parent); 
+            }
+
             GameBoard best_child = null; 
             if (parent.GetChildren().Count > 0)
             {
@@ -367,6 +380,11 @@ namespace Assignment457
              * Because we want to maximize our moves
              * 
              */
+            if (parent.GetChildren().Count <= 0)
+            {
+                CalculateMoves(parent);
+            }
+
             GameBoard worst_child = null; 
 
             if (parent.GetChildren().Count > 0)
