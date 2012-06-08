@@ -101,7 +101,7 @@ namespace Assignment457
             Stopwatch stopWatch = new Stopwatch();
 
             // get user input
-            Console.WriteLine("Search Type:\n[1] Breadth First Search\n[2] Depth First Search\n[3] A* Search");
+            Console.WriteLine("Search Type:\n[1] Breadth First Search\n[2] Depth First Search\n[3] Optimized Depth First Search\n[4] A* Search");
             int search_type = Convert.ToInt32(Console.ReadLine());
 
             // perform search algorithm
@@ -124,11 +124,6 @@ namespace Assignment457
                     stopWatch.Reset();
                     break;
                 case 2:
-                    //depth first search
-                    //int steps = 0;
-                    //bool searchResult = false;
-                    //For timing purposes
-
                     stopWatch.Start();
                     searchResult = DepthFirstSearch(start_node, ref steps, ref node_list);
                     stopWatch.Stop();
@@ -143,7 +138,23 @@ namespace Assignment457
                     Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
                     stopWatch.Reset();
                     break;
-                case 3: // A* search
+                case 3:
+                    stopWatch.Start();
+                    steps = OptDepthFirstSearch(start_node, ref node_list);
+                    stopWatch.Stop();
+                    searchResult = (steps == -1) ? false : true;
+                    if (searchResult)
+                    {
+                        printSearchInformation(start_node, steps, node_list);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Search Failed!");
+                    }
+                    Console.WriteLine("Total Search Time: " + stopWatch.Elapsed.ToString());
+                    stopWatch.Reset();
+                    break;
+                case 4: // A* search
                     start_node.calculatePathCost(start_node, exit_node);
                     node_list[exit_node.GetX(), exit_node.GetY()] = 0; // set exit node
 
@@ -336,6 +347,85 @@ namespace Assignment457
             }
             return false;
         }
+
+        static int OptDepthFirstSearch(Node node, ref byte[,] node_list)
+        {
+            int x, y;
+            x = node.GetX();
+            y = node.GetY();
+
+            // check if reached endpoint
+            if (node_list[x, y] == 2)
+            {
+                return 1;
+            }
+
+            node_list[x, y] = 3; // mark as visited
+            int size = 10000000;
+            Node chosen_child = null;
+            //Go through children, create tree and conduct depth first search
+            for (int i = 0; i < 4; i++)
+            {
+                Node child_node = null;
+                switch (i)
+                {
+                    case 0:
+                        if (x < 24 && node_list[x + 1, y] != 1)
+                        {
+                            child_node = new Node(x + 1, y, node);
+                        }
+                        break;
+                    case 1:
+                        if (x > 0 && node_list[x - 1, y] != 1)
+                        {
+                            child_node = new Node(x - 1, y, node);
+                        }
+                        break;
+                    case 2:
+                        if (y < 24 && node_list[x, y + 1] != 1)
+                        {
+                            child_node = new Node(x, y + 1, node);
+                        }
+                        break;
+                    case 3:
+                        if (y > 0 && node_list[x, y - 1] != 1)
+                        {
+                            child_node = new Node(x, y - 1, node);
+                        }
+                        break;
+                }
+
+                //only perform DFS on child node, if it has been added
+                if (child_node != null)
+                {
+                    if (node_list[child_node.GetX(), child_node.GetY()] != 3)
+                    {
+                        int count;
+                        if ((count = OptDepthFirstSearch(child_node, ref node_list)) != -1)
+                        {
+                            if (count < size)
+                            {
+                                size = count;
+                                chosen_child = child_node;
+                            }
+                            else if (count == size)
+                            {
+                                node_list[child_node.GetX(), child_node.GetY()] = 8; // Mark as visted, but potential solution
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (chosen_child != null)
+            {
+                node_list[node.GetX(), node.GetY()] = 4; // mark path as part of solution
+                node.AddChild(chosen_child);
+                return size + 1;
+            }
+            return -1;
+        }
+
         //Hacky Method to print out information and graph.
         static void printSearchInformation(Node start_node, int steps, byte[,] node_list)
         {
@@ -370,6 +460,10 @@ namespace Assignment457
                     else if (node_list[k, l] == 5)
                     {
                         Console.Write("S");
+                    }
+                    else
+                    {
+                        Console.Write("-");
                     }
 
                 }
