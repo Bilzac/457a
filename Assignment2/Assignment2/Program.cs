@@ -29,8 +29,22 @@ namespace Assignment2
 
                 switch (a)
                 {
-                    case 'a':
-                        q1 = new Question1(5, 100, 200, 0.9); 
+                    case 'a':                        
+                        Console.WriteLine("Run with constraint? Y/N");
+                        char b = Console.ReadLine().ToLower().ToCharArray()[0];
+                        if (b == 'y')
+                        {
+                            q1 = new Question1(5, 100, 200, 0.9, 50); //constraint
+                        }
+                        else if (b == 'n')
+                        {
+                            q1 = new Question1(5, 100, 200, 0.9); // no constraint
+                        }
+                        else
+                        {
+                            break; 
+                        }
+                        
                         q1.RunPartA(); 
                         break;
                     case 'b':

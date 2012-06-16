@@ -86,18 +86,19 @@ namespace Assignment2
             // go through each array
             for (int x = 0; x < car_number; x++)
             {
-                Console.WriteLine("\nRoute " + x + ": "); 
+                Console.Write("Route " + x + ": "); 
 
                 LinkedList<int> route = GetRoute(x);
                 foreach (int i in route)
                 {
                    Console.Write((i+1) + " "); 
                 }
+                Console.WriteLine(); 
 
             }
             // print cost
-            Console.WriteLine("\nCost: " + cost);
-            //Console.WriteLine("***************\n"); 
+            Console.WriteLine("Cost: " + cost);
+            Console.WriteLine("\n"); 
         }
 
     }

@@ -23,12 +23,14 @@ namespace Assignment2
         // SOLUTION
         int car_number = 0; //start time for cars
         int cities = 0;
-       
+        int constraint = 0; //constraint on each route
+
         // SIMULATED ANNEALING
         int temperature = 0; //temperature
         int iterations = 0; //number of iterations at each temperature
         double alpha = 0; //annealing schedule
         
+
         // RANDOM
         Random r = new Random();
 
@@ -40,27 +42,39 @@ namespace Assignment2
         public Question1(int car_number, int start_temp, int iterations, double alpha)
         {
             this.car_number = car_number;
-            this.cities = depot.Length; // number of cities 
-            
-            //create new solution - initial solution
-            //soln = new Solution(car_number);
-                        
-            //go through all cities
-            //add them randomly to a car
-            /*for (int i = 0; i < cities; i++)
-            {
-                int random = r.Next(car_number-1);
-                //soln.GetRoute(random).AddLast(i); 
-            }
-            */
+            this.cities = depot.Length; // number of cities                         
             this.temperature = start_temp;
             this.iterations = iterations; 
             this.alpha = alpha; 
 
         }
 
+        public Question1(int car_number, int start_temp, int iterations, double alpha, int constraint)
+        {
+            this.car_number = car_number;
+            this.cities = depot.Length; // number of cities                         
+            this.temperature = start_temp;
+            this.iterations = iterations;
+            this.alpha = alpha;
+            this.constraint = constraint; 
+        }
+
         // MAIN
         public void RunPartA()
+        {
+            if (constraint == 0)
+            {
+                RunPartAWithoutConstraint();
+            }
+            else
+            {
+                RunPartAWithConstraint(); 
+            }
+            return; 
+        }
+
+
+        public void RunPartAWithoutConstraint()
         {
             Solution best_soln = new Solution(car_number); 
             
@@ -110,18 +124,94 @@ namespace Assignment2
                         best_soln = candidate; // candidate is new best
                         best_cost = candidate.GetCost(); 
                     }
-                    //Console.WriteLine("Temperature: {0}, Count: {1}", temperature, count); 
-                    //best_soln.PrintSolution(); 
+                    Console.WriteLine("Temperature: {0}, Count: {1}", temperature, count); 
+                    best_soln.PrintSolution(); 
                     // should we store 'all time best'?
 
                     count--; 
-                }
-                best_soln.PrintSolution(); 
+                }                
                 // decrease temperature
                 CoolingSchedule(); 
             }
+            // print final best
+            Console.WriteLine("Best Solution");
+            best_soln.PrintSolution();
+
+            return; 
         }
 
+        public void RunPartAWithConstraint()
+        {
+            Solution best_soln = null; 
+
+            // ensure initial solution meets constraint
+            do
+            {
+                // random initial solution
+                best_soln = new Solution(car_number);
+                
+                //go through all cities
+                //add them randomly to a car
+                for (int i = 0; i < cities; i++)
+                {
+                    int random = r.Next(car_number - 1);
+                    best_soln.GetRoute(random).AddLast(i);
+                }
+            } while (!CheckConstraint(best_soln)); 
+
+            int best_cost = EvaluateCost(best_soln); //eval initial cost
+
+            Console.WriteLine("INITIAL SOLUTION");
+            best_soln.PrintSolution();
+
+            // start SA processs
+            while (temperature != 0)
+            {
+                int count = iterations;
+                // # of iterations per temperature
+                while (count > 0)
+                {
+                    // create new solution
+                    Solution candidate = best_soln.CloneSolution();
+
+                    // operator selection - switch cities between routes
+                    // switch city order within a route
+                    int operation = r.Next(1, 3);
+                    if (operation % 2 == 0)
+                    {
+                        // swtich cities between routes
+                        candidate = SwitchCityRoute(candidate);
+                    }
+                    else
+                    {
+                        // switch city order
+                        SwitchCityOrder(candidate);
+                    }
+
+                    int current_cost = EvaluateCost(candidate);
+                    //candidate.PrintSolution();
+
+                    // figure out if solution is going to be the best
+                    if (SolutionAcceptanceConstraint(best_soln, candidate) == true)
+                    {
+                        best_soln = candidate; // candidate is new best
+                        best_cost = candidate.GetCost();
+                    }
+                    Console.WriteLine("Temperature: {0}, Count: {1}", temperature, count); 
+                    best_soln.PrintSolution(); 
+                    // should we store 'all time best'?
+
+                    count--;
+                }                
+                // decrease temperature
+                CoolingSchedule();
+            }
+            // print final best
+            Console.WriteLine("Best Solution"); 
+            best_soln.PrintSolution();
+
+            return; 
+        }
 
         public void SetCars(int car_number)
         {
@@ -161,6 +251,33 @@ namespace Assignment2
                 }
             }
             return soln.GetCost();
+        }
+
+
+        // Evaluate cost of route only
+        public int EvaluateRouteCost(LinkedList<int> route)
+        {
+            int cost = 0;    
+                if (route.Count > 0)
+                {
+                    // distance from depot to first city
+                    int city = Convert.ToInt16(route.First.Value);
+                    cost = cost + depot[city]; //distance from depot to first
+                    city = Convert.ToInt16(route.Last.Value);
+                    cost = cost + depot[city]; //distance from depot to last
+
+                    // go through route's cities and add distances 
+                    for (int a = 1; a < route.Count; a++)
+                    {
+                        //start with city -1 and city and add distances
+                        cost = cost + distance[route.ElementAt(a - 1), route.ElementAt(a)];
+
+                        //add service times for each city
+                        cost = cost + service[route.ElementAt(a - 1)];
+                    }
+                }
+            
+            return cost;
         }
 
         // OPERATOR
@@ -289,8 +406,48 @@ namespace Assignment2
             return false; // candidate not accepted
         }
 
-        
+        public bool SolutionAcceptanceConstraint(Solution best, Solution candidate)
+        {
+            if (CheckConstraint(candidate) == false)
+            {
+                return false; // reject candidate solution
+            }
 
+            if (best.GetCost() - candidate.GetCost() > 0) // candidate cost is less
+            {
+                return true; // candidate is accepted
+            }
+            else
+            {
+                // accpetance probability = e^-cost/temp
+                int negcost = candidate.GetCost() - (2 * candidate.GetCost());
+                double exp = (double)negcost / (double)temperature;
+                double prob = Math.Exp(exp); // acceptance probability
 
+                double threshold = r.NextDouble(); // acceptance threshold - random
+
+                if (prob.CompareTo(threshold) > 0) // if accept prob > accept thresh
+                {
+                    //Console.WriteLine("probability of acceptance: {0}\nthreshold of acceptance: {1}",
+                    //    prob, threshold); 
+                    return true; // candidate accepted
+                }
+            }
+            return false; // candidate not accepted
+        }
+
+        public bool CheckConstraint(Solution candidate)
+        {
+            // check routes
+            for (int i = 0; i < car_number; i++)
+            {
+                int route_cost = EvaluateRouteCost(candidate.GetRoute(i));  //eval each route cost
+                if (route_cost > constraint)
+                {
+                    return false; // reject candidate
+                }
+            }
+            return true; 
+        }
     }
 }
