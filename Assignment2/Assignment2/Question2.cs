@@ -7,9 +7,19 @@ namespace Assignment2
 {
     class Question2
     {
+        // Simulated Annealing constants
         private const double INITIAL_TEMPERATURE = 100;
         private const double FINAL_TEMPERATURE = 0.01;
         private const int MAX_ITERATIONS = 200;
+
+        // Genetic Algorithm constants
+        private const bool CASE1 = true;
+        private const int POPULATION_CASE1 = 50;
+        private const int GENERATIONS_CASE1 = 1000;
+
+        private const bool CASE2 = false;
+        private const int POPULATION_CASE2 = 100;
+        private const int GENERATIONS_CASE2 = 500;
 
         public Question2() { }
 
@@ -68,7 +78,8 @@ namespace Assignment2
             while (true)
             {
                 Console.WriteLine("\n**********");
-                Console.WriteLine("Select algorithm:\n[1] Simulated Annealing\n[2] Genetic algorithm\n[3] Return to Main Menu");
+                Console.WriteLine("Select algorithm:\n[1] Simulated Annealing\n[2] Genetic algorithm: Case 1\n" + 
+                                  "[3] Genetic algorithm: Case 2\n[4] Return to Main Menu");
                 char input = Console.ReadLine().ToLower().ToCharArray()[0];
 
                 switch (input)
@@ -77,9 +88,12 @@ namespace Assignment2
                         doSimulatedAnnealing(distanceMatrix, flowMatrix);
                         break;
                     case '2':
-                        doGeneticAlgorithm(distanceMatrix, flowMatrix);
+                        doGeneticAlgorithm(distanceMatrix, flowMatrix, CASE1);
                         break;
                     case '3':
+                        doGeneticAlgorithm(distanceMatrix, flowMatrix, CASE2);
+                        break;
+                    case '4':
                         Console.WriteLine("Returning to Main Menu...\n");
                         return;
                     default:
@@ -112,14 +126,14 @@ namespace Assignment2
             int iterations = 0;
             while (temperature >= FINAL_TEMPERATURE) // stop after final temperature is reached
             {
-                while (iterations <= MAX_ITERATIONS) 
-                { 
+                iterations = 0;
+                while (iterations < MAX_ITERATIONS)
+                {
                     iterations++;
 
                     // Get random candidate
                     int[] newDepartments = getRandomCandidateFromNeighbourhood(departments);
                     int newCost = computeCost(newDepartments, distanceMatrix, flowMatrix);
-
                     int deltaCost = newCost - currentCost;
 
                     // generate random number (for acceptance probability)
@@ -137,33 +151,14 @@ namespace Assignment2
                     if (currentCost < bestCost)
                     {
                         bestCost = currentCost;
-                        Console.WriteLine("Cost: " + currentCost + ", temp: " + temperature + ", iter: " + iterations);
+                        Console.WriteLine(
+                            string.Format("Cost: {0}, temp: {1:N2}, iter: {2}", bestCost, temperature, iterations));
                     }
                 }
-
                 temperature = updateTemperature(temperature);
             }
 
-            Console.WriteLine("The best cost is " + bestCost + ".");
-            Console.WriteLine("Solution: " + convToString(departments[1]) + "  " + convToString(departments[2]) + "  "
-                                           + convToString(departments[3]) + "  " + convToString(departments[4]));
-            Console.WriteLine("          " + convToString(departments[5]) + "  " + convToString(departments[6]) + "  "
-                                           + convToString(departments[7]) + "  " + convToString(departments[8]));
-            Console.WriteLine("          " + convToString(departments[9]) + "  " + convToString(departments[10]) + "  "
-                                           + convToString(departments[11]) + "  " + convToString(departments[12]));
-            Console.WriteLine("          " + convToString(departments[13]) + "  " + convToString(departments[14]) + "  "
-                                           + convToString(departments[15]) + "  " + convToString(departments[16]));
-            Console.WriteLine("          " + convToString(departments[17]) + "  " + convToString(departments[18]) + "  "
-                                           + convToString(departments[19]) + "  " + convToString(departments[20]));
-            Console.WriteLine();
-        }
-
-        public string convToString(int i)
-        {
-            if ((i / 10) > 0)
-                return i.ToString();
-            else
-                return " " + i;
+            displayBestSolution(bestCost, departments);
         }
 
         public double updateTemperature(double temperature)
@@ -188,9 +183,118 @@ namespace Assignment2
         }
 
         /* ====================== Genetic Algorithm Methods ================================= */
-        public void doGeneticAlgorithm(int[,] distanceMatrix, int[,] flowMatrix)
+        public void doGeneticAlgorithm(int[,] distanceMatrix, int[,] flowMatrix, bool caseType)
+        {
+            // Set values of population and generation based on which type they selected
+            int generations = getGeneration(caseType);
+            int population = getPopulation(caseType);
+         
+            // get random candidates
+            List<Individual> populations = initializePopulation(population, distanceMatrix, flowMatrix);
+
+            int iterations = 0;
+            while (iterations < generations)
+            {
+                iterations++;
+            }
+        }
+
+        public List<Individual> initializePopulation(int population, int[,] distanceMatrix, int[,] flowMatrix)
+        {
+            List<Individual> randomCandidates = new List<Individual>();
+            int candidates = 0;
+
+            int[] numbers = new int[20]
+            {  
+                1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
+                11, 12, 13, 14, 15, 16, 17, 18, 19, 20 
+            };
+
+            while (candidates < population)
+            {
+                int[] departments = createRandomCandidate(numbers);
+                // make sure that that two candidates are not equal.. (highly unlikely, but check just in case)
+                if (!candidateExists(departments, randomCandidates))
+                {
+                    Individual individual = new Individual(departments, computeCost(departments, distanceMatrix, flowMatrix));
+                    randomCandidates.Add(individual);
+                    candidates++;
+                }
+            }
+
+            return randomCandidates;
+        }
+
+        public int[] createRandomCandidate(int[] numbers)
+        {
+            Random random = new Random();
+
+	        List<KeyValuePair<int, int>> list = new List<KeyValuePair<int, int>>();
+	        foreach (int num in numbers)
+	        {
+	            list.Add(new KeyValuePair<int, int>(random.Next(), num));
+	        }
+
+	        // Sort list by the random number
+	        var sorted = from item in list
+		                 orderby item.Key ascending
+		                 select item;
+            
+	        // Create new array and copy values to array
+	        int[] result = new int[numbers.Length + 1];
+	        int index = 1; // the first one is always 0
+	        foreach (KeyValuePair<int, int> pair in sorted)
+	        {
+	            result[index] = pair.Value;
+	            index++;
+	        }
+
+	        return result;
+        }
+
+        public bool candidateExists(int[] departments, List<Individual> population)
+        {
+            foreach (Individual individual in population)
+            {
+                if (departments.SequenceEqual(individual.individual))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void selectParents()
         {
 
+        }
+
+        public void applyCrossOver()
+        {
+
+        }
+
+        public void mutateOffspring()
+        {
+            // insert mutation
+            // swap mutation
+            // Inversion mutation
+            // Scramble mutation
+        }
+
+        public void replaceCurrentGeneration()
+        {
+
+        }
+
+        public int getGeneration(bool caseType)
+        {
+            if (caseType) return GENERATIONS_CASE1;
+            else return GENERATIONS_CASE2;
+        }
+        public int getPopulation(bool caseType)
+        {
+            if (caseType) return POPULATION_CASE1;
+            else return POPULATION_CASE2;
         }
 
         /* ============================= Common methods ===================================== */
@@ -225,6 +329,30 @@ namespace Assignment2
             }
 
             return solution;
+        }
+
+        public void displayBestSolution(int bestCost, int[] departments)
+        {
+            Console.WriteLine("The best cost is " + bestCost + ".");
+            Console.WriteLine("Solution: " + convToString(departments[1]) + "  " + convToString(departments[2]) + "  "
+                                           + convToString(departments[3]) + "  " + convToString(departments[4]));
+            Console.WriteLine("          " + convToString(departments[5]) + "  " + convToString(departments[6]) + "  "
+                                           + convToString(departments[7]) + "  " + convToString(departments[8]));
+            Console.WriteLine("          " + convToString(departments[9]) + "  " + convToString(departments[10]) + "  "
+                                           + convToString(departments[11]) + "  " + convToString(departments[12]));
+            Console.WriteLine("          " + convToString(departments[13]) + "  " + convToString(departments[14]) + "  "
+                                           + convToString(departments[15]) + "  " + convToString(departments[16]));
+            Console.WriteLine("          " + convToString(departments[17]) + "  " + convToString(departments[18]) + "  "
+                                           + convToString(departments[19]) + "  " + convToString(departments[20]));
+            Console.WriteLine();
+        }
+
+        public string convToString(int i)
+        {
+            if ((i / 10) > 0)
+                return i.ToString();
+            else
+                return " " + i;
         }
     }
 }
