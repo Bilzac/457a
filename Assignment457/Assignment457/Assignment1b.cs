@@ -288,7 +288,8 @@ namespace Assignment457
             //TIE
             if (next_move.GetChildren().Count > 0)
             {
-                Console.WriteLine("NO winner. Try again..."); 
+                Console.WriteLine("NO winner. Try again...");
+                return; 
             }
 
 
@@ -301,6 +302,7 @@ namespace Assignment457
             {
                 Console.WriteLine("Computer wins");
             }
+            return; 
         }
 
 
@@ -625,7 +627,7 @@ namespace Assignment457
                     }
                 }
             }
-            //store moves in parent
+            //store moves in parent - number of squares covereed - failed eval fxn
             /* int squares = 0; 
              for (int x = 0; x < 4; x++)
              {
