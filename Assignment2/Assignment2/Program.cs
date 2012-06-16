@@ -30,7 +30,7 @@ namespace Assignment2
                 switch (a)
                 {
                     case 'a':
-                        q1 = new Question1(5, 100, 200, 0.5); 
+                        q1 = new Question1(5, 100, 200, 0.9); 
                         q1.RunPartA(); 
                         break;
                     case 'b':

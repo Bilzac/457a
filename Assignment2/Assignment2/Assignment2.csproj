@@ -43,11 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Compile Include="Solution.cs" />
-=======
     <Compile Include="Individual.cs" />
->>>>>>> 78c50f1868e56e2ffdb524745040d442fdc61d96
     <Compile Include="Question3.cs" />
     <Compile Include="Question2.cs" />
     <Compile Include="Question1.cs" />

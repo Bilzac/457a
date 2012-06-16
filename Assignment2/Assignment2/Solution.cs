@@ -30,7 +30,7 @@ namespace Assignment2
         public Solution CloneSolution()
         {
             Solution s = new Solution(this.car_number);
-            //s.cost = this.cost; 
+            s.cost = 0;
 
             // initialize array of linked lists
             for (int i = 0; i < car_number; i++)
@@ -86,12 +86,12 @@ namespace Assignment2
             // go through each array
             for (int x = 0; x < car_number; x++)
             {
-                //Console.WriteLine("\nRoute " + x + ": "); 
+                Console.WriteLine("\nRoute " + x + ": "); 
 
                 LinkedList<int> route = GetRoute(x);
                 foreach (int i in route)
                 {
-                   // Console.Write((i+1) + " "); 
+                   Console.Write((i+1) + " "); 
                 }
 
             }

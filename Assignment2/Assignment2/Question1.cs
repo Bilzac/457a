@@ -23,9 +23,7 @@ namespace Assignment2
         // SOLUTION
         int car_number = 0; //start time for cars
         int cities = 0;
-       // Solution soln = null; 
-       // LinkedList<int>[] cars; //routes of each car
-
+       
         // SIMULATED ANNEALING
         int temperature = 0; //temperature
         int iterations = 0; //number of iterations at each temperature
@@ -89,8 +87,19 @@ namespace Assignment2
                     // create new solution
                     Solution candidate = best_soln.CloneSolution();
                     
-                    // operator - switch cities between routes
-                    candidate = SwitchCityRoute(candidate);
+                    // operator selection - switch cities between routes
+                                         // switch city order within a route
+                    int operation = r.Next(1, 3);
+                    if (operation % 2 == 0)
+                    {
+                        // swtich cities between routes
+                        candidate = SwitchCityRoute(candidate);
+                    }
+                    else
+                    {
+                        // switch city order
+                        SwitchCityOrder(candidate);
+                    }                   
 
                     int current_cost = EvaluateCost(candidate);
                     //candidate.PrintSolution();
@@ -101,13 +110,13 @@ namespace Assignment2
                         best_soln = candidate; // candidate is new best
                         best_cost = candidate.GetCost(); 
                     }
-                    Console.WriteLine("Temperature: {0}, Count: {1}", temperature, count); 
-                    best_soln.PrintSolution(); 
+                    //Console.WriteLine("Temperature: {0}, Count: {1}", temperature, count); 
+                    //best_soln.PrintSolution(); 
                     // should we store 'all time best'?
 
                     count--; 
                 }
-
+                best_soln.PrintSolution(); 
                 // decrease temperature
                 CoolingSchedule(); 
             }
@@ -141,13 +150,13 @@ namespace Assignment2
                     soln.AddCost(depot[city]); //distance from depot to last
 
                     // go through route's cities and add distances 
-                    for (int a = 1; a <= route.Count; a++)
+                    for (int a = 1; a < route.Count; a++)
                     {
                         //start with city -1 and city and add distances
-                        soln.AddCost(distance[a - 1, a]);
+                        soln.AddCost(distance[route.ElementAt(a - 1), route.ElementAt(a)]);
 
                         //add service times for each city
-                        soln.AddCost(service[a - 1]);
+                        soln.AddCost(service[route.ElementAt(a - 1)]);
                     }
                 }
             }
@@ -225,7 +234,17 @@ namespace Assignment2
 
         public void SwitchCityOrder(Solution soln)
         {
+            // first random route
+            int random_route1 = r.Next(car_number - 1);
 
+            // make sure has more than 1 city in it
+            while (soln.GetRoute(random_route1).Count < 2)
+            {
+                random_route1 = r.Next(car_number - 1);
+            }
+            int city1 = soln.GetRoute(random_route1).ElementAt(0); // remove first city
+            soln.GetRoute(random_route1).RemoveFirst(); // remove first city
+            soln.GetRoute(random_route1).AddLast(city1); // add it to the end
         }
 
         // TEMPERATURE
@@ -262,8 +281,8 @@ namespace Assignment2
 
                 if (prob.CompareTo(threshold) > 0) // if accept prob > accept thresh
                 {
-                    Console.WriteLine("probability of acceptance: {0}/nthreshold of acceptance: {1}",
-                        prob, threshold); 
+                    //Console.WriteLine("probability of acceptance: {0}\nthreshold of acceptance: {1}",
+                    //    prob, threshold); 
                     return true; // candidate accepted
                 }
             }    
