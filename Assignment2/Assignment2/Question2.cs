@@ -21,11 +21,18 @@ namespace Assignment2
         private const int POPULATION_CASE2 = 100;
         private const int GENERATIONS_CASE2 = 500;
 
+        private const double CROSSOVER_PROBABILITY = 0.7;
+        private const double MUTATION_PROBABILITY = 0.2;
+
+        Random random = new Random();
+        int[,] distanceMatrix;
+        int[,] flowMatrix;
+
         public Question2() { }
 
         public void RunPartB()
         {
-            int[,] distanceMatrix = new int[21, 21] 
+            distanceMatrix = new int[21, 21] 
             {  
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 1, 2, 3, 4, 1, 2, 3, 4, 5, 2, 3, 4, 5, 6, 3, 4, 5, 6, 7},
@@ -50,7 +57,7 @@ namespace Assignment2
                 {0, 7, 6, 5, 4, 3, 6, 5, 4, 3, 2, 5, 4, 3, 2, 1, 4, 3, 2, 1, 0}
             };
 
-            int[,] flowMatrix = new int[21, 21]
+            flowMatrix = new int[21, 21]
             {
                 {0,  0,  0, 0,  0, 0,  0,  0,  0, 0, 0,  0,  0,  0,  0,  0,  0, 0, 0,  0,  0},
                 {0,  0,  0, 5,  0, 5,  2, 10,  3, 1, 5,  5,  5,  0,  0,  5,  4, 4, 0,  0,  1},
@@ -85,13 +92,13 @@ namespace Assignment2
                 switch (input)
                 {
                     case '1':
-                        doSimulatedAnnealing(distanceMatrix, flowMatrix);
+                        doSimulatedAnnealing();
                         break;
                     case '2':
-                        doGeneticAlgorithm(distanceMatrix, flowMatrix, CASE1);
+                        doGeneticAlgorithm(CASE1);
                         break;
                     case '3':
-                        doGeneticAlgorithm(distanceMatrix, flowMatrix, CASE2);
+                        doGeneticAlgorithm(CASE2);
                         break;
                     case '4':
                         Console.WriteLine("Returning to Main Menu...\n");
@@ -104,7 +111,7 @@ namespace Assignment2
         }
 
         /* ===================== Simulated Annealing Methods =============================== */
-        public void doSimulatedAnnealing(int[,] distanceMatrix, int[,] flowMatrix)
+        public void doSimulatedAnnealing()
         {
             // department[i] = department, i = location
             // Initial solution
@@ -116,7 +123,7 @@ namespace Assignment2
                 };
 
             // get initial cost 
-            int currentCost = computeCost(departments, distanceMatrix, flowMatrix);
+            int currentCost = computeCost(departments);
             int bestCost = currentCost;
             Console.WriteLine("Cost: " + currentCost + ", temp: 100, iter: 0");
 
@@ -132,12 +139,11 @@ namespace Assignment2
                     iterations++;
 
                     // Get random candidate
-                    int[] newDepartments = getRandomCandidateFromNeighbourhood(departments);
-                    int newCost = computeCost(newDepartments, distanceMatrix, flowMatrix);
+                    int[] newDepartments = doRandomSwap(departments);
+                    int newCost = computeCost(newDepartments);
                     int deltaCost = newCost - currentCost;
 
                     // generate random number (for acceptance probability)
-                    Random random = new Random();
                     double randomNumber = random.NextDouble();
                     double acceptanceProb = Math.Exp((-1 * deltaCost) / temperature);
 
@@ -166,40 +172,49 @@ namespace Assignment2
             return temperature * 0.95;
         }
 
-        public int[] getRandomCandidateFromNeighbourhood(int[] departments)
-        {
-            Random random = new Random();
-            int i = random.Next(1, 21);
-            int j = random.Next(1, 21);
-
-            while (i == j)
-            {
-                i = random.Next(1, 21);
-                j = random.Next(1, 21);
-            }
-
-            int[] newDepartments = swapValues(departments, i, j);
-            return newDepartments;
-        }
-
         /* ====================== Genetic Algorithm Methods ================================= */
-        public void doGeneticAlgorithm(int[,] distanceMatrix, int[,] flowMatrix, bool caseType)
+        public void doGeneticAlgorithm(bool caseType)
         {
             // Set values of population and generation based on which type they selected
             int generations = getGeneration(caseType);
             int population = getPopulation(caseType);
          
             // get random candidates
-            List<Individual> populations = initializePopulation(population, distanceMatrix, flowMatrix);
+            List<Individual> pop = initializePopulation(population);
 
+            // update fitness value, assign rank, ... and set best cost
+            Individual[] parents = evaluateIndividuals(pop);
+            int bestCost = parents[0].fitness;
+            int[] bestSolution = parents[0].individual;
+            Console.WriteLine("Cost: " + bestCost + ", generation: 0");
+            
             int iterations = 0;
-            while (iterations < generations)
+            while (iterations < generations && bestCost > 2750)
             {
+                if (parents[0].fitness < bestCost)
+                {
+                    Console.WriteLine("Cost: " + bestCost + ", generation: " + iterations);
+                }
+
+                // select a set of parents
+                Individual[] newPopulation = selectParents(parents, population);
+                pop.Clear(); // clear original list because we dont need them anymore
+                
+                for (int i = 0; i < newPopulation.Length; i = i + 2)
+                {
+                    applyCrossOver(newPopulation[i], newPopulation[i+1]);
+                    pop.Add(mutateOffspring(newPopulation[i]));
+                    pop.Add(mutateOffspring(newPopulation[i+1]));
+                }
+
+                // update fitness value, assign rank, ...
+                parents = evaluateIndividuals(pop);
+
                 iterations++;
             }
         }
 
-        public List<Individual> initializePopulation(int population, int[,] distanceMatrix, int[,] flowMatrix)
+        public List<Individual> initializePopulation(int population)
         {
             List<Individual> randomCandidates = new List<Individual>();
             int candidates = 0;
@@ -216,7 +231,7 @@ namespace Assignment2
                 // make sure that that two candidates are not equal.. (highly unlikely, but check just in case)
                 if (!candidateExists(departments, randomCandidates))
                 {
-                    Individual individual = new Individual(departments, computeCost(departments, distanceMatrix, flowMatrix));
+                    Individual individual = new Individual(departments);
                     randomCandidates.Add(individual);
                     candidates++;
                 }
@@ -227,12 +242,10 @@ namespace Assignment2
 
         public int[] createRandomCandidate(int[] numbers)
         {
-            Random random = new Random();
-
 	        List<KeyValuePair<int, int>> list = new List<KeyValuePair<int, int>>();
 	        foreach (int num in numbers)
 	        {
-	            list.Add(new KeyValuePair<int, int>(random.Next(), num));
+	            list.Add(new KeyValuePair<int, int>(random.Next(1,100), num));
 	        }
 
 	        // Sort list by the random number
@@ -254,36 +267,95 @@ namespace Assignment2
 
         public bool candidateExists(int[] departments, List<Individual> population)
         {
-            foreach (Individual individual in population)
-            {
-                if (departments.SequenceEqual(individual.individual))
-                    return true;
-            }
-
+            var sorted = from item in population
+                         where departments.SequenceEqual(item.individual)
+                         select item;
+            if (sorted.Count() > 0)
+                return true;
             return false;
         }
 
-        public void selectParents()
+        public Individual[] selectParents(Individual[] parents, int selectionSize)
         {
+            // select parents
+            Individual[] selectedParents = new Individual[selectionSize];
+            for (int i = 0; i < selectionSize; i++)
+            {
+                double randomNumber = random.NextDouble();
 
+                var sorted = from individual in parents
+                             where individual.rouletteWheelValue < randomNumber
+                             orderby individual.rouletteWheelValue ascending
+                             select individual;
+                selectedParents[i] = sorted.ToList().Last();
+            }
+            return selectedParents;
         }
 
-        public void applyCrossOver()
+        public void applyCrossOver(Individual parent1, Individual parent2)
         {
-
+            // use single crossover
+            double randomNumber = random.NextDouble();
+            int[] par1 = parent1.individual;
+            int[] par2 = parent2.individual;
+            
+            if (randomNumber < CROSSOVER_PROBABILITY)
+            {
+                int randomIntNum = random.Next(1, 20);
+                for (int i = randomIntNum; i < par1.Count(); i++)
+                {
+                    int j = par1[i];
+                    par1[i] = par2[i];
+                    par2[1] = j;
+                }
+            }
         }
 
-        public void mutateOffspring()
+        public Individual mutateOffspring(Individual child)
         {
-            // insert mutation
-            // swap mutation
-            // Inversion mutation
-            // Scramble mutation
+            Random random = new Random();
+            double randomNumber = random.NextDouble();
+
+            // Swap mutation
+            if (randomNumber < MUTATION_PROBABILITY)
+                child.individual = doRandomSwap(child.individual);
+            return child;
         }
 
-        public void replaceCurrentGeneration()
+        public Individual[] evaluateIndividuals(List<Individual> population)
         {
+            // get fitness
+            foreach (Individual ind in population)
+            {
+                ind.fitness = computeCost(ind.individual);
+            }
 
+            // sort individuals by fitness
+            var sorted = from individual in population
+                         orderby individual.fitness descending
+                         select individual;
+            population = sorted.ToList();
+
+            int totalFitness = 0;
+
+            // assign rank
+            Individual[] parents = population.ToArray();
+            for (int i = 1; i <= parents.Length; i++)
+            {
+                totalFitness = i + totalFitness;
+                parents[i - 1].rank = i;
+            }
+
+            // normalized fitness of each individual and 
+            // show where the fitness is located on the roulette wheel
+            parents[0].normalizedFitness = parents[0].rank / totalFitness;
+            parents[0].rouletteWheelValue = parents[0].normalizedFitness;
+            for (int i = 1; i < parents.Length; i++)
+            {
+                parents[i].normalizedFitness = parents[i].rank / totalFitness;
+                parents[i].rouletteWheelValue = parents[i - 1].rouletteWheelValue + parents[i].normalizedFitness;
+            }
+            return parents;
         }
 
         public int getGeneration(bool caseType)
@@ -314,7 +386,20 @@ namespace Assignment2
             return newList;
         }
 
-        public int computeCost(int[] departments, int[,] distanceMatrix, int[,] flowMatrix)
+        public int[] doRandomSwap(int[] item)
+        {
+            int i = random.Next(1, 20);
+            int j = random.Next(1, 20);
+
+            while (i == j)
+            {
+                i = random.Next(1, 20);
+                j = random.Next(1, 20);
+            }
+            return swapValues(item, i, j);
+        }
+
+        public int computeCost(int[] departments)
         {
             // compute cost
             int solution = 0;
