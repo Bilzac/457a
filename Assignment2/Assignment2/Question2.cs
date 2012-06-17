@@ -180,15 +180,13 @@ namespace Assignment2
             int population = getPopulation(caseType);
          
             // get random candidates
-            List<Individual> pop = initializePopulation(population);
+            Individual[] parents = initializePopulation(population).ToArray();
 
-            // update fitness value, assign rank, ... and set best cost
-            Individual[] parents = evaluateIndividuals(pop);
             int bestCost = parents[0].fitness;
             int[] bestSolution = parents[0].individual;
             
             int iterations = 0;
-            while (iterations < generations && bestCost > 2750)
+            while (iterations < generations && bestCost > 2570)
             {
                 // display the best of each generation
                 var sorted = from individual in parents
@@ -202,20 +200,29 @@ namespace Assignment2
                     Console.WriteLine("Cost: " + bestCost + ", generation: " + iterations);
                 }
 
-                // select a set of parents
-                Individual[] newPopulation = selectParents(parents, population);
-                pop.Clear(); // clear original list because we dont need them anymore
-                
-                for (int i = 0; i < newPopulation.Length; i = i + 2)
+                // do genetic algorithm
+                List<Individual> children = new List<Individual>();
+                for (int i = 0; i < population; i = i + 2)
                 {
-                    applyCrossOver(newPopulation[i], newPopulation[i+1]);
-                    pop.Add(mutateOffspring(newPopulation[i]));
-                    pop.Add(mutateOffspring(newPopulation[i+1]));
+                    Individual[] selectedParents = selectParents(parents);
+                    selectedParents = applyCrossOver(selectedParents[0], selectedParents[1]);
+                    children.Add(mutateOffspring(selectedParents[0]));
+                    children.Add(mutateOffspring(selectedParents[1]));
                 }
 
-                // update fitness value, assign rank, ...
-                parents = evaluateIndividuals(pop);
+                // take the 5 individuals with the highest fitness for next generation - elitism
+                var parentsSorted = from individual in parents
+                                    orderby individual.fitness ascending
+                                    select individual;
+                List<Individual> parentsChosen = parentsSorted.Take(5).ToList();
 
+                updateFitness(children);
+                var childrenSorted = from individual in children
+                                     orderby individual.fitness ascending
+                                     select individual;
+                List<Individual> childrenChosen = childrenSorted.Take(population - 5).ToList();
+
+                parents = parentsChosen.Concat(childrenChosen).ToArray();
                 iterations++;
             }
         }
@@ -238,6 +245,7 @@ namespace Assignment2
                 if (!candidateExists(departments, randomCandidates))
                 {
                     Individual individual = new Individual(departments);
+                    individual.fitness = computeCost(departments);
                     randomCandidates.Add(individual);
                     candidates++;
                 }
@@ -281,33 +289,37 @@ namespace Assignment2
             return false;
         }
 
-        public Individual[] selectParents(Individual[] parents, int selectionSize)
+        public Individual[] selectParents(Individual[] parents)
         {
-            // select parents
-            Individual[] selectedParents = new Individual[selectionSize];
-            for (int i = 0; i < selectionSize; i++)
+            Individual[] selectedParents = new Individual[2];
+            for (int i = 0; i < selectedParents.Length; i++)
             {
-                double randomNumber = random.NextDouble();
+                int j = random.Next(0, parents.Length - 1);
+                int k = random.Next(0, parents.Length - 1);
+                while (j == k)
+                {
+                    j = random.Next(0, parents.Length - 1);
+                    k = random.Next(0, parents.Length - 1);
+                }
 
-                var sorted = from individual in parents
-                             where individual.rouletteWheelValue <= randomNumber
-                             orderby individual.rouletteWheelValue ascending
-                             select individual;
+                Individual child1 = parents[j];
+                Individual child2 = parents[k];
 
-                List<Individual> selected = sorted.ToList();
-                if (selected.Count == 0)
-                    selectedParents[i] = parents[0];
+                if (child1.fitness < child2.fitness)
+                    selectedParents[i] = child1;
                 else
-                    selectedParents[i] = selected.Last();
-            }
+                    selectedParents[i] = child2;
+            } 
+            
             return selectedParents;
         }
 
-        public void applyCrossOver(Individual parent1, Individual parent2)
+        public Individual[] applyCrossOver(Individual parent1, Individual parent2)
         {
             // Order 1 crossover
-            Individual child1 = new Individual();
-            Individual child2 = new Individual();
+            Individual[] children = new Individual[2];
+            children[0] = new Individual();
+            children[1] = new Individual();
 
             int rand1 = random.Next(1, 15);
             int rand2 = random.Next(11, 20);
@@ -315,79 +327,37 @@ namespace Assignment2
             // copy randomly selected set from parents
             for (int i = rand1; i <= rand2; i++)
             {
-                child1.individual[i] = parent1.individual[i];
-                child2.individual[i] = parent2.individual[i];
+                children[0].individual[i] = parent1.individual[i];
+                children[1].individual[i] = parent2.individual[i];
             }
 
             // copy the rest of parent2 into child1
-            copyRestIntoChild(parent2, child1, rand2);
+            copyRestIntoChild(parent2, children[0], rand2);
             // copy the rest of parent1 into child2
-            copyRestIntoChild(parent1, child2, rand2);
+            copyRestIntoChild(parent1, children[1], rand2);
 
-            // reset parents with new offsprings
-            parent2 = child1;
-            parent1 = child2;
+            return children;
         }
 
-        public Individual mutateOffspring(Individual child)
+        public Individual mutateOffspring(Individual parent)
         {
             Random random = new Random();
             double randomNumber = random.NextDouble();
 
             // Swap mutation
+            Individual child = copyIndividual(parent);
+
             if (randomNumber < MUTATION_PROBABILITY)
                 child.individual = doRandomSwap(child.individual);
             return child;
         }
 
-        public Individual[] evaluateIndividuals(List<Individual> population)
+        public void updateFitness(List<Individual> population)
         {
-            // get fitness
-            int totalFitness = 0;
             foreach (Individual ind in population)
             {
                 ind.fitness = computeCost(ind.individual);
-                totalFitness = totalFitness + ind.fitness;
             }
-
-            Individual[] parents = population.ToArray();
-            parents[0].normalizedFitness = (double)parents[0].fitness / (double)totalFitness;
-            parents[0].rouletteWheelValue = parents[0].normalizedFitness;
-            for (int i = 1; i < parents.Length; i++)
-            {
-                parents[i].normalizedFitness = (double)parents[i].fitness / (double)totalFitness;
-                parents[i].rouletteWheelValue = parents[i - 1].rouletteWheelValue + parents[i].normalizedFitness;
-            }
-            parents[parents.Length - 1].rouletteWheelValue = 1;
-
-            // sort individuals by fitness
-            /*var sorted = from individual in population
-                         orderby individual.fitness ascending
-                         select individual;
-            population = sorted.ToList();
-            
-            int totalFitness = 0;
-            
-            // assign rank
-            Individual[] parents = population.ToArray();
-            for (int i = 0; i < parents.Length; i++)
-            {
-                totalFitness = (i+1) + totalFitness;
-                parents[i].rank = parents.Length - i;
-            }
-
-            // normalized fitness of each individual and 
-            // show where the fitness is located on the roulette wheel
-            parents[0].normalizedFitness = (double)parents[0].rank / (double)totalFitness;
-            parents[0].rouletteWheelValue = parents[0].normalizedFitness;
-            for (int i = 1; i < parents.Length; i++)
-            {
-                parents[i].normalizedFitness = (double)parents[i].rank / (double)totalFitness;
-                parents[i].rouletteWheelValue = parents[i - 1].rouletteWheelValue + parents[i].normalizedFitness;
-            }
-            parents[parents.Length - 1].rouletteWheelValue = 1;
-            */
-            return parents;
         }
 
         public void copyRestIntoChild(Individual parent, Individual child, int startingPosition)
@@ -429,16 +399,30 @@ namespace Assignment2
         public int[] swapValues(int[] list, int x, int y)
         {
             // create a new list (a new instance so that the original does not get overwritten)
-            int[] newList = new int[21];
-            for (int i = 0; i < list.Length; i++)
-            {
-                newList[i] = list[i];
-            }
+            int[] newList = copyArray(list);
 
             // swap values in the array
             int a = newList[x], b = newList[y];
             newList[y] = a;
             newList[x] = b;
+            return newList;
+        }
+
+        public Individual copyIndividual(Individual individual)
+        {
+            Individual newInd = new Individual();
+            newInd.individual = copyArray(individual.individual);
+            newInd.fitness = individual.fitness;
+            return newInd;
+        }
+
+        public int[] copyArray(int[] oldList)
+        {
+            int[] newList = new int[21];
+            for (int i = 0; i < oldList.Length; i++)
+            {
+                newList[i] = oldList[i];
+            }
             return newList;
         }
 
