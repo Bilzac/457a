@@ -186,13 +186,19 @@ namespace Assignment2
             Individual[] parents = evaluateIndividuals(pop);
             int bestCost = parents[0].fitness;
             int[] bestSolution = parents[0].individual;
-            Console.WriteLine("Cost: " + bestCost + ", generation: 0");
             
             int iterations = 0;
             while (iterations < generations && bestCost > 2750)
             {
-                if (parents[0].fitness < bestCost)
+                // display the best of each generation
+                var sorted = from individual in parents
+                             orderby individual.fitness ascending
+                             select individual;
+                Individual ind = sorted.ToList().First();
+                if (ind.fitness < bestCost)
                 {
+                    bestCost = ind.fitness;
+                    bestSolution = ind.individual;
                     Console.WriteLine("Cost: " + bestCost + ", generation: " + iterations);
                 }
 
@@ -284,31 +290,43 @@ namespace Assignment2
                 double randomNumber = random.NextDouble();
 
                 var sorted = from individual in parents
-                             where individual.rouletteWheelValue < randomNumber
+                             where individual.rouletteWheelValue <= randomNumber
                              orderby individual.rouletteWheelValue ascending
                              select individual;
-                selectedParents[i] = sorted.ToList().Last();
+
+                List<Individual> selected = sorted.ToList();
+                if (selected.Count == 0)
+                    selectedParents[i] = parents[0];
+                else
+                    selectedParents[i] = selected.Last();
             }
             return selectedParents;
         }
 
         public void applyCrossOver(Individual parent1, Individual parent2)
         {
-            // use single crossover
-            double randomNumber = random.NextDouble();
-            int[] par1 = parent1.individual;
-            int[] par2 = parent2.individual;
-            
-            if (randomNumber < CROSSOVER_PROBABILITY)
+            // Order 1 crossover
+            Individual child1 = new Individual();
+            Individual child2 = new Individual();
+
+            int rand1 = random.Next(1, 15);
+            int rand2 = random.Next(11, 20);
+           
+            // copy randomly selected set from parents
+            for (int i = rand1; i <= rand2; i++)
             {
-                int randomIntNum = random.Next(1, 20);
-                for (int i = randomIntNum; i < par1.Count(); i++)
-                {
-                    int j = par1[i];
-                    par1[i] = par2[i];
-                    par2[1] = j;
-                }
+                child1.individual[i] = parent1.individual[i];
+                child2.individual[i] = parent2.individual[i];
             }
+
+            // copy the rest of parent2 into child1
+            copyRestIntoChild(parent2, child1, rand2);
+            // copy the rest of parent1 into child2
+            copyRestIntoChild(parent1, child2, rand2);
+
+            // reset parents with new offsprings
+            parent2 = child1;
+            parent1 = child2;
         }
 
         public Individual mutateOffspring(Individual child)
@@ -325,37 +343,75 @@ namespace Assignment2
         public Individual[] evaluateIndividuals(List<Individual> population)
         {
             // get fitness
+            int totalFitness = 0;
             foreach (Individual ind in population)
             {
                 ind.fitness = computeCost(ind.individual);
+                totalFitness = totalFitness + ind.fitness;
             }
 
+            Individual[] parents = population.ToArray();
+            parents[0].normalizedFitness = (double)parents[0].fitness / (double)totalFitness;
+            parents[0].rouletteWheelValue = parents[0].normalizedFitness;
+            for (int i = 1; i < parents.Length; i++)
+            {
+                parents[i].normalizedFitness = (double)parents[i].fitness / (double)totalFitness;
+                parents[i].rouletteWheelValue = parents[i - 1].rouletteWheelValue + parents[i].normalizedFitness;
+            }
+            parents[parents.Length - 1].rouletteWheelValue = 1;
+
             // sort individuals by fitness
-            var sorted = from individual in population
-                         orderby individual.fitness descending
+            /*var sorted = from individual in population
+                         orderby individual.fitness ascending
                          select individual;
             population = sorted.ToList();
-
+            
             int totalFitness = 0;
-
+            
             // assign rank
             Individual[] parents = population.ToArray();
-            for (int i = 1; i <= parents.Length; i++)
+            for (int i = 0; i < parents.Length; i++)
             {
-                totalFitness = i + totalFitness;
-                parents[i - 1].rank = i;
+                totalFitness = (i+1) + totalFitness;
+                parents[i].rank = parents.Length - i;
             }
 
             // normalized fitness of each individual and 
             // show where the fitness is located on the roulette wheel
-            parents[0].normalizedFitness = parents[0].rank / totalFitness;
+            parents[0].normalizedFitness = (double)parents[0].rank / (double)totalFitness;
             parents[0].rouletteWheelValue = parents[0].normalizedFitness;
             for (int i = 1; i < parents.Length; i++)
             {
-                parents[i].normalizedFitness = parents[i].rank / totalFitness;
+                parents[i].normalizedFitness = (double)parents[i].rank / (double)totalFitness;
                 parents[i].rouletteWheelValue = parents[i - 1].rouletteWheelValue + parents[i].normalizedFitness;
             }
+            parents[parents.Length - 1].rouletteWheelValue = 1;
+            */
             return parents;
+        }
+
+        public void copyRestIntoChild(Individual parent, Individual child, int startingPosition)
+        {
+            int childCounter = (startingPosition == 20) ? 1 : startingPosition + 1;
+            int i = childCounter;
+            for (i = childCounter; i != startingPosition; i++)
+            {
+                if (!child.individual.Contains(parent.individual[i]))
+                {
+                    child.individual[childCounter] = parent.individual[i];
+                    childCounter++;
+
+                    if (childCounter > 20)
+                        childCounter = 1;
+                }
+
+                if (i == 20)
+                    i = 0;
+            }
+            if (child.individual[childCounter] == 0)
+            {
+                child.individual[childCounter] = parent.individual[i];
+            }
         }
 
         public int getGeneration(bool caseType)

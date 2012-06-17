@@ -42,6 +42,10 @@ namespace Assignment2
         }
 
         // Constructor
+        public Individual()
+        {
+            _individual = new int[21];
+        }
         public Individual(int[] individual)
         {
             _individual = individual;
