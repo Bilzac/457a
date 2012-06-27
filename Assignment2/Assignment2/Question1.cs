@@ -8,16 +8,17 @@ namespace Assignment2
 {
     class Question1
     {
-        int[] depot = new int[] {1, 2, 3, 4, 5}; //distance from city to dept
+        int[] depot = new int[] {1, 2, 3, 4, 5, 6}; //distance from city to dept
         int[,] distance = new int[,]  //distance between cities
             {
-                {0, 3, 4, 5, 6},
-                {3, 0, 6, 9, 8},
-                {4, 6, 0, 1, 1},
-                {5, 9, 1, 0, 2},
-                {6, 8, 1, 2, 0}
+                {0, 3, 4, 5, 6, 7},
+                {3, 0, 6, 9, 8, 9},
+                {4, 6, 0, 1, 1, 2},
+                {5, 9, 1, 0, 2, 3},
+                {6, 8, 1, 2, 0, 4}, 
+                {7, 9, 2, 3, 4, 0}
             };
-        int[] service = new int[] { 10, 20, 30, 40, 50 }; //service time at each city 
+        int[] service = new int[] { 10, 20, 30, 40, 50, 60 }; //service time at each city 
         
 
         // SOLUTION

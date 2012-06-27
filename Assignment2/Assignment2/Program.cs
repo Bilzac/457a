@@ -34,11 +34,11 @@ namespace Assignment2
                         char b = Console.ReadLine().ToLower().ToCharArray()[0];
                         if (b == 'y')
                         {
-                            q1 = new Question1(5, 100, 200, 0.9, 50); //constraint
+                            q1 = new Question1(6, 100, 200, 0.9, 50); //constraint
                         }
                         else if (b == 'n')
                         {
-                            q1 = new Question1(5, 100, 200, 0.9); // no constraint
+                            q1 = new Question1(6, 100, 200, 0.9); // no constraint
                         }
                         else
                         {
