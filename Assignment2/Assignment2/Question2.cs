@@ -179,7 +179,7 @@ namespace Assignment2
             int generations = getGeneration(caseType);
             int population = getPopulation(caseType);
          
-            // get random candidates
+            // intialize population with the specified number of individuals
             Individual[] parents = initializePopulation(population).ToArray();
 
             int bestCost = parents[0].fitness;
@@ -188,7 +188,7 @@ namespace Assignment2
             int iterations = 0;
             while (iterations < generations && bestCost > 2570)
             {
-                // display the best of each generation
+                // display the best in each generation
                 var sorted = from individual in parents
                              orderby individual.fitness ascending
                              select individual;
@@ -210,21 +210,23 @@ namespace Assignment2
                     children.Add(mutateOffspring(selectedParents[1]));
                 }
 
-                // take the 5 individuals with the highest fitness for next generation - elitism
+                // take 1 individuals with the highest fitness to continue in the next generation (elitism)
                 var parentsSorted = from individual in parents
                                     orderby individual.fitness ascending
                                     select individual;
-                List<Individual> parentsChosen = parentsSorted.Take(5).ToList();
+                List<Individual> parentsChosen = parentsSorted.Take(1).ToList();
 
                 updateFitness(children);
                 var childrenSorted = from individual in children
                                      orderby individual.fitness ascending
                                      select individual;
-                List<Individual> childrenChosen = childrenSorted.Take(population - 5).ToList();
-
+                List<Individual> childrenChosen = childrenSorted.Take(population - 1).ToList();
+          
                 parents = parentsChosen.Concat(childrenChosen).ToArray();
                 iterations++;
             }
+
+            displayBestSolution(bestCost, bestSolution);
         }
 
         public List<Individual> initializePopulation(int population)
@@ -241,7 +243,7 @@ namespace Assignment2
             while (candidates < population)
             {
                 int[] departments = createRandomCandidate(numbers);
-                // make sure that that two candidates are not equal.. (highly unlikely, but check just in case)
+                // check for duplicate
                 if (!candidateExists(departments, randomCandidates))
                 {
                     Individual individual = new Individual(departments);
@@ -291,9 +293,11 @@ namespace Assignment2
 
         public Individual[] selectParents(Individual[] parents)
         {
+            // tournament selection
             Individual[] selectedParents = new Individual[2];
             for (int i = 0; i < selectedParents.Length; i++)
             {
+                // select two random children
                 int j = random.Next(0, parents.Length - 1);
                 int k = random.Next(0, parents.Length - 1);
                 while (j == k)
@@ -305,9 +309,10 @@ namespace Assignment2
                 Individual child1 = parents[j];
                 Individual child2 = parents[k];
 
-                if (child1.fitness < child2.fitness)
+                // select the fitness of the two               
+               if (child1.fitness < child2.fitness)
                     selectedParents[i] = child1;
-                else
+               else
                     selectedParents[i] = child2;
             } 
             
@@ -316,40 +321,44 @@ namespace Assignment2
 
         public Individual[] applyCrossOver(Individual parent1, Individual parent2)
         {
-            // Order 1 crossover
-            Individual[] children = new Individual[2];
-            children[0] = new Individual();
-            children[1] = new Individual();
-
-            int rand1 = random.Next(1, 15);
-            int rand2 = random.Next(11, 20);
-           
-            // copy randomly selected set from parents
-            for (int i = rand1; i <= rand2; i++)
+            double randomNumber = random.NextDouble();
+            if (randomNumber < CROSSOVER_PROBABILITY)
             {
-                children[0].individual[i] = parent1.individual[i];
-                children[1].individual[i] = parent2.individual[i];
+                // Order 1 crossover
+                Individual[] children = new Individual[2];
+                children[0] = new Individual();
+                children[1] = new Individual();
+                int rand1 = random.Next(1, 10);
+                int rand2 = random.Next(11, 20);
+
+                // copy a random selected set from parents to children
+                for (int i = rand1; i <= rand2; i++)
+                {
+                    children[0].individual[i] = parent1.individual[i];
+                    children[1].individual[i] = parent2.individual[i];
+                }
+
+                // copy the rest of parent2 into child1
+                copyRestIntoChild(parent2, children[0], rand2);
+                // copy the rest of parent1 into child2
+                copyRestIntoChild(parent1, children[1], rand2);
+
+                return children;
             }
-
-            // copy the rest of parent2 into child1
-            copyRestIntoChild(parent2, children[0], rand2);
-            // copy the rest of parent1 into child2
-            copyRestIntoChild(parent1, children[1], rand2);
-
-            return children;
+               
+            return new Individual[] { parent1, parent2};
         }
 
-        public Individual mutateOffspring(Individual parent)
+        public Individual mutateOffspring(Individual offspring)
         {
-            Random random = new Random();
             double randomNumber = random.NextDouble();
 
             // Swap mutation
-            Individual child = copyIndividual(parent);
+            Individual mutatedChild = copyIndividual(offspring);
 
             if (randomNumber < MUTATION_PROBABILITY)
-                child.individual = doRandomSwap(child.individual);
-            return child;
+                mutatedChild.individual = doRandomSwap(mutatedChild.individual);
+            return mutatedChild;
         }
 
         public void updateFitness(List<Individual> population)
