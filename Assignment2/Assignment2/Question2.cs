@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace Assignment2
 {
@@ -27,6 +28,8 @@ namespace Assignment2
         Random random = new Random();
         int[,] distanceMatrix;
         int[,] flowMatrix;
+
+        Stopwatch stopWatch = new Stopwatch();
 
         public Question2() { }
 
@@ -89,16 +92,26 @@ namespace Assignment2
                                   "[3] Genetic algorithm: Case 2\n[4] Return to Main Menu");
                 char input = Console.ReadLine().ToLower().ToCharArray()[0];
 
+                stopWatch.Reset();
                 switch (input)
                 {
                     case '1':
+                        stopWatch.Start();
                         doSimulatedAnnealing();
+                        stopWatch.Stop();
+                        displayTimingInformation(stopWatch.ElapsedMilliseconds.ToString());                        
                         break;
                     case '2':
+                        stopWatch.Start();
                         doGeneticAlgorithm(CASE1);
+                        stopWatch.Stop();
+                        displayTimingInformation(stopWatch.ElapsedMilliseconds.ToString());  
                         break;
                     case '3':
+                        stopWatch.Start();
                         doGeneticAlgorithm(CASE2);
+                        stopWatch.Stop();
+                        displayTimingInformation(stopWatch.ElapsedMilliseconds.ToString());  
                         break;
                     case '4':
                         Console.WriteLine("Returning to Main Menu...\n");
@@ -223,6 +236,7 @@ namespace Assignment2
                 List<Individual> childrenChosen = childrenSorted.Take(population - 1).ToList();
           
                 parents = parentsChosen.Concat(childrenChosen).ToArray();
+
                 iterations++;
             }
 
@@ -357,7 +371,9 @@ namespace Assignment2
             Individual mutatedChild = copyIndividual(offspring);
 
             if (randomNumber < MUTATION_PROBABILITY)
+            {
                 mutatedChild.individual = doRandomSwap(mutatedChild.individual);
+            }
             return mutatedChild;
         }
 
@@ -479,6 +495,11 @@ namespace Assignment2
             Console.WriteLine("          " + convToString(departments[17]) + "  " + convToString(departments[18]) + "  "
                                            + convToString(departments[19]) + "  " + convToString(departments[20]));
             Console.WriteLine();
+        }
+
+        public void displayTimingInformation(string time)
+        {
+            Console.WriteLine("Total time: " + time + " milliseconds");
         }
 
         public string convToString(int i)
