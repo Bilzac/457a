@@ -52,7 +52,64 @@ namespace Assignment2
                         q2.RunPartB();
                         break;
                     case 'c':
-                        q3 = new Question3();
+                        Console.WriteLine("Use default values? Y/N [No. of Generations: 50, Population: 150, Mutation Prob.: 0.25, Crossover Prob.: 0.6 ]");
+                        char i = Console.ReadLine().ToLower().ToCharArray()[0];
+                        if (i == 'y')
+                        {
+                            q3 = new Question3();
+                        }
+                        else if (i == 'n')
+                        {
+                            
+                            try
+                            {
+                                int generations = 0;
+                                while (generations <= 0)
+                                {
+                                    Console.WriteLine("Enter No. of Generations: [>0]");
+                                    generations = int.Parse(Console.ReadLine());
+                                }
+
+                                int population = 0;
+                                while (population <= 2)
+                                {
+                                    Console.WriteLine("Enter Population Size: [>2]");
+                                    population = int.Parse(Console.ReadLine());
+                                }
+
+                                double mutationProb = -1;
+                                while ( !(mutationProb >= 0 && mutationProb <= 1) )
+                                {
+                                    Console.WriteLine("Enter Mutation Prob.: [0 - 1]");
+                                    mutationProb = double.Parse(Console.ReadLine());
+                                }
+
+                                double crossoverProb = -1;
+                                while ( !(crossoverProb >= 0 && crossoverProb <= 1) )
+                                {
+                                    Console.WriteLine("Enter Crossover Prob.: [0 - 1]");
+                                    crossoverProb = double.Parse(Console.ReadLine());
+                                }
+
+                                q3 = new Question3(generations, population, mutationProb, crossoverProb);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("Error Occured: " + e.ToString());
+                                break;
+                            } 
+
+                        } else {
+                            break;
+                        }
+                        Console.WriteLine("Enter File Name to save results: [Leave Blank To NOT Save the Results]");
+                        String filename = Console.ReadLine();
+                        q3.Run();
+                        if (!filename.Equals(""))
+                        {
+                            Question3.generateCSV(filename,q3.GetBestPopulation());
+                        }
+
                         break;
                     case 'q':
                         Console.WriteLine("Exiting...");
