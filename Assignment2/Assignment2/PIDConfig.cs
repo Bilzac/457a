@@ -10,7 +10,10 @@ namespace Assignment2
 
         private static double alpha = 0.7;
 
-        private MLApp.MLAppClass matlab;
+        public bool mutate = false;
+        public bool crossover = false;
+
+       // private MLApp.MLAppClass matlab;
 
         public static double MAX_kp = 17.99;
         public static double MIN_kp = 2.01;
@@ -43,6 +46,7 @@ namespace Assignment2
             this.KP = Math.Round(parent1.KP * alpha + parent2.KP * (1 - alpha), 2);
             this.TI = Math.Round(parent1.TI * alpha + parent2.TI * (1 - alpha), 2);
             this.TD = Math.Round(parent1.TD * alpha + parent2.TD * (1 - alpha), 2);
+            crossover = true;
         }
 
         public PIDConfig(PIDConfig copy)
@@ -50,6 +54,8 @@ namespace Assignment2
             this.KP = copy.KP;
             this.TI = copy.TI;
             this.TD = copy.TD;
+            this.mutate = copy.mutate;
+            this.crossover = copy.crossover;
         }
 
         public PIDConfig(double kp, double ti, double td)
@@ -102,7 +108,7 @@ namespace Assignment2
             //return some fitness level;
             if (this.fitness == -1)
             {
-                matlab = new MLApp.MLAppClass();
+                //matlab = new MLApp.MLAppClass();
                 //matlab.Execute("cmd");
 
                 StringBuilder sb = new StringBuilder();
@@ -120,10 +126,10 @@ namespace Assignment2
                 sb.Append("t_s = sysinf.SettlingTime;");
                 sb.Append("M_p = sysinf.Overshoot;");
 
-                matlab.Execute(sb.ToString());
+                Question3.matlab.Execute(sb.ToString());
                 try
                 {
-                    this.ise = (double)matlab.GetVariable("ISE", "base");
+                    this.ise = (double)Question3.matlab.GetVariable("ISE", "base");
                     //this.ise = Math.Round(this.ise, 2);
                 }
                 catch (InvalidCastException ice)
@@ -133,7 +139,7 @@ namespace Assignment2
 
                 try
                 {
-                    this.tr = (double)matlab.GetVariable("t_r", "base");
+                    this.tr = (double)Question3.matlab.GetVariable("t_r", "base");
                     //this.tr = Math.Round(this.tr, 2);
                 }
                 catch (InvalidCastException ice)
@@ -143,7 +149,7 @@ namespace Assignment2
 
                 try
                 {
-                    this.ts = (double)matlab.GetVariable("t_s", "base");
+                    this.ts = (double)Question3.matlab.GetVariable("t_s", "base");
                     //this.ts = Math.Round(this.ts, 2);
                 }
                 catch (InvalidCastException ice)
@@ -153,7 +159,7 @@ namespace Assignment2
 
                 try
                 {
-                    this.mp = (double)matlab.GetVariable("M_p", "base");
+                    this.mp = (double)Question3.matlab.GetVariable("M_p", "base");
                     //this.mp = Math.Round(this.mp, 2);
                 }
                 catch (InvalidCastException ice)
@@ -188,7 +194,8 @@ namespace Assignment2
 
         public void Mutate()
         {
- 
+            mutate = true;
+
             double number = Question3.r.NextDouble() * 2 - 1;
 
             this.KP += ((MAX_kp - MIN_kp) * 0.40) * number + this.KP ;

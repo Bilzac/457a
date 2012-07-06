@@ -111,7 +111,7 @@ namespace Assignment2
                         q3.Run();
                         if (!filename.Equals(""))
                         {
-                            Question3.generateCSV(filename,q3.GetBestPopulation());
+                            Question3.generateCSV(filename,q3.GetBestPopulation(),q3.GetAllFitness());
                         }
                         break;
                     case 'q':

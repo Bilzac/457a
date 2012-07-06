@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -14,10 +15,13 @@ namespace Assignment2
         private int totalPopulation = 50;
         private int generations = 150;
 
+        public static MLApp.MLAppClass matlab = new MLApp.MLAppClass();
+
         public static Random r = new Random();
 
         ArrayList population; //current population
         ArrayList bestPopulation; //best solution across generations
+        List<double> totalFitnessAcrossGens;
 
         public Question3()
         {
@@ -37,6 +41,7 @@ namespace Assignment2
         {
             population = new ArrayList();
             bestPopulation = new ArrayList();
+            totalFitnessAcrossGens = new List<double>();
             totalFitness = 0;
             for (int i = 0; i < totalPopulation; i++)
             {
@@ -51,6 +56,7 @@ namespace Assignment2
                 totalFitness += ((PIDConfig)population[i]).getFitness();
             }
             population.Sort();
+            totalFitnessAcrossGens.Add(totalFitness);
             bestPopulation.Add(population[0]);
         }
 
@@ -59,6 +65,10 @@ namespace Assignment2
             return bestPopulation;
         }
 
+        public List<double> GetAllFitness()
+        {
+            return totalFitnessAcrossGens;
+        }
         public void Run()
         {
             
@@ -130,19 +140,21 @@ namespace Assignment2
 
                 population.Sort();
                 bestPopulation.Add(population[0]);
+                totalFitnessAcrossGens.Add(totalFitness);
+                Console.WriteLine("Total Fitness = " + totalFitness);
                 Console.WriteLine(((PIDConfig)population[0]).ToString());
             }
         }
 
 
-        public static void generateCSV(String filename, ArrayList a)
+        public static void generateCSV(String filename, ArrayList a, List<double> d)
         {
             System.IO.StreamWriter file = new System.IO.StreamWriter(filename + ".csv");
-            file.WriteLine("Kp,Ti,Td,ts,tr,ISE,Mp,Fitness");
+            file.WriteLine("Generation,Kp,Ti,Td,ts,tr,ISE,Mp,Fitness,isMutate,isCrossover,Overall Fitness");
             for (int i = 0; i < a.Count; i++)
             {
                 PIDConfig tmp = (PIDConfig)a[i];
-                String line = tmp.KP + "," + tmp.TI + "," + tmp.TD + "," + tmp.TS + "," + tmp.TR + "," + tmp.ISE + "," + tmp.MP + "," + tmp.getFitness();
+                String line = i + "," + tmp.KP + "," + tmp.TI + "," + tmp.TD + "," + tmp.TS + "," + tmp.TR + "," + tmp.ISE + "," + tmp.MP + "," + tmp.getFitness() + "," + tmp.mutate + "," + tmp.crossover + ","+ d[i];
                 file.WriteLine(line);
             }
             file.Close();
