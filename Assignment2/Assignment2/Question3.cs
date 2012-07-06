@@ -10,9 +10,11 @@ namespace Assignment2
 
         private double crossover_prob = 0.6;
         private double mutation_prob = 0.25;
-        private double totalFitness = 0;
+        private double totalFitness;
         private int totalPopulation = 50;
         private int generations = 150;
+
+        public static Random r = new Random();
 
         ArrayList population; //current population
         ArrayList bestPopulation; //best solution across generations
@@ -34,17 +36,17 @@ namespace Assignment2
         public void initPopulation()
         {
             population = new ArrayList();
-            Random random = new Random();
             bestPopulation = new ArrayList();
+            totalFitness = 0;
             for (int i = 0; i < totalPopulation; i++)
             {
                 double ti = 0, td = 0, kp = 0;
                 //kp
-                kp = Math.Round(((random.NextDouble() * (PIDConfig.MAX_kp - PIDConfig.MIN_kp)) + PIDConfig.MIN_kp), 2);
+                kp = Math.Round(((r.NextDouble() * (PIDConfig.MAX_kp - PIDConfig.MIN_kp)) + PIDConfig.MIN_kp), 2);
                 //ti
-                ti = Math.Round(((random.NextDouble() * (PIDConfig.MAX_ti - PIDConfig.MIN_ti)) + PIDConfig.MIN_ti), 2);
+                ti = Math.Round(((r.NextDouble() * (PIDConfig.MAX_ti - PIDConfig.MIN_ti)) + PIDConfig.MIN_ti), 2);
                 //td
-                td = Math.Round(((random.NextDouble() * (PIDConfig.MAX_td - PIDConfig.MIN_td)) + PIDConfig.MIN_td), 2);
+                td = Math.Round(((r.NextDouble() * (PIDConfig.MAX_td - PIDConfig.MIN_td)) + PIDConfig.MIN_td), 2);
                 population.Add(new PIDConfig(kp, ti, td));
                 totalFitness += ((PIDConfig)population[i]).getFitness();
             }
@@ -63,6 +65,7 @@ namespace Assignment2
             Random r = new Random();
             for (int i = 0; i < generations; i++)
             {
+
                 PIDConfig currentLeader1 = (PIDConfig)population[0];
                 PIDConfig currentLeader2 = (PIDConfig)population[1];
 
@@ -86,34 +89,36 @@ namespace Assignment2
                         parents[l] = (PIDConfig)population[k];
                     }
 
-
+                    PIDConfig child1 = null;
+                    PIDConfig child2 = null;
+                    
                     //Crossover
                     if (r.NextDouble() <= crossover_prob)
                     {
-
-                        PIDConfig child1 = new PIDConfig((PIDConfig)parents[0], (PIDConfig)parents[1]);
-                        if (r.NextDouble() <= mutation_prob)
-                        {
-                            child1.Mutate();
-                        }
-                        newOverallFitness += child1.getFitness();
-                        children.Add(child1);
-
-                        PIDConfig child2 = new PIDConfig((PIDConfig)parents[1], (PIDConfig)parents[0]);
-                        if (r.NextDouble() <= mutation_prob)
-                        {
-                            child2.Mutate();
-                        }
-                        newOverallFitness += child2.getFitness();
-                        children.Add(child2);
+                        child1  = new PIDConfig((PIDConfig)parents[0], (PIDConfig)parents[1]);
+                        child2 = new PIDConfig((PIDConfig)parents[1], (PIDConfig)parents[0]);
                     }
                     else
                     {
-                        newOverallFitness += parents[0].getFitness();
-                        children.Add(parents[0]);
-                        newOverallFitness += parents[1].getFitness();
-                        children.Add(parents[1]);
+                        child1 = new PIDConfig(parents[0]);
+                        child2 = new PIDConfig(parents[1]);
                     }
+
+                    if (r.NextDouble() <= mutation_prob)
+                    {
+                        child1.Mutate();
+                    }
+                    newOverallFitness += child1.getFitness();
+                    children.Add(child1);
+
+                   
+                    if (r.NextDouble() <= mutation_prob)
+                    {
+                        child2.Mutate();
+                    }
+                    newOverallFitness += child2.getFitness();
+                    children.Add(child2);
+
                 }
 
                 //Survival (Best two from previous generation survive on)

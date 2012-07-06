@@ -45,6 +45,13 @@ namespace Assignment2
             this.TD = Math.Round(parent1.TD * alpha + parent2.TD * (1 - alpha), 2);
         }
 
+        public PIDConfig(PIDConfig copy)
+        {
+            this.KP = copy.KP;
+            this.TI = copy.TI;
+            this.TD = copy.TD;
+        }
+
         public PIDConfig(double kp, double ti, double td)
         {
             param[0] = kp;
@@ -135,7 +142,7 @@ namespace Assignment2
                 }
 
                 try
-                {     
+                {
                     this.ts = (double)matlab.GetVariable("t_s", "base");
                     //this.ts = Math.Round(this.ts, 2);
                 }
@@ -154,8 +161,14 @@ namespace Assignment2
                     this.mp = 9999.99; //Infinity
                 }
 
-                this.fitness = 1/(this.ise + this.tr + this.ts  + this.mp );
+                this.fitness = 1 / (this.ise + this.tr + this.ts + this.mp);
             }
+
+            if (fitness == -1)
+            {
+                Console.WriteLine("Fuck");
+            }
+            
             return this.fitness;
         }
 
@@ -175,14 +188,14 @@ namespace Assignment2
 
         public void Mutate()
         {
-            Random r = new Random();
-            double n = r.NextDouble() * 2 - 1;
-            
-            this.KP += n * Math.Min(this.KP - MIN_kp, MAX_kp - this.KP);
+ 
+            double number = Question3.r.NextDouble() * 2 - 1;
 
-            this.TD += n * Math.Min(this.TD - MIN_td, MAX_td - this.TD);
+            this.KP += ((MAX_kp - MIN_kp) * 0.40) * number + this.KP ;
 
-            this.TI += n * Math.Min(this.TI - MIN_ti, MAX_ti - this.TI);
+            this.TD += ((MAX_td - MIN_td) * 0.40) * number + this.TD;
+
+            this.TI += ((MAX_ti - MIN_ti) * 0.40) * number + this.TI; 
 
             this.KP = Math.Round(Math.Max(Math.Min(MAX_kp,this.KP),MIN_kp),2);
             this.TD = Math.Round(Math.Max(Math.Min(MAX_td, this.TD), MIN_td),2);

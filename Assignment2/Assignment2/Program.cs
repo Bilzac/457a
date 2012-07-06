@@ -109,7 +109,6 @@ namespace Assignment2
                         {
                             Question3.generateCSV(filename,q3.GetBestPopulation());
                         }
-
                         break;
                     case 'q':
                         Console.WriteLine("Exiting...");
