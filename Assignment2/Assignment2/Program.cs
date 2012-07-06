@@ -54,13 +54,19 @@ namespace Assignment2
                     case 'c':
                         Console.WriteLine("Use default values? Y/N [No. of Generations: 50, Population: 150, Mutation Prob.: 0.25, Crossover Prob.: 0.6 ]");
                         char i = Console.ReadLine().ToLower().ToCharArray()[0];
+                        String filename = "";
                         if (i == 'y')
                         {
+                            Console.WriteLine("Enter File Name to save results: [Leave Blank To NOT Save the Results]");
+                            filename = Console.ReadLine();
+
                             q3 = new Question3();
                         }
                         else if (i == 'n')
                         {
-                            
+                            Console.WriteLine("Enter File Name to save results: [Leave Blank To NOT Save the Results]");
+                            filename = Console.ReadLine();
+
                             try
                             {
                                 int generations = 0;
@@ -102,8 +108,6 @@ namespace Assignment2
                         } else {
                             break;
                         }
-                        Console.WriteLine("Enter File Name to save results: [Leave Blank To NOT Save the Results]");
-                        String filename = Console.ReadLine();
                         q3.Run();
                         if (!filename.Equals(""))
                         {
