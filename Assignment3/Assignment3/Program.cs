@@ -45,7 +45,7 @@ namespace ConsoleApplication1
                         Char b1 = Console.ReadLine().ToLower().ToCharArray()[0];
                         // run part 1b - need to add switch based on b1
                         
-                                b = new Part1b(30, 1000, 0.5, 0.5, b1);
+                                b = new Part1b(30, 1000, 2.5, 2.5, b1);
                                 b.RunParticleSwarmOptimization();
                                 break; 
                         

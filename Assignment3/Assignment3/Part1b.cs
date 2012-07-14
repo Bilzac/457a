@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics; 
 
 namespace ConsoleApplication1
 {
@@ -134,11 +135,33 @@ namespace ConsoleApplication1
                         CalculateWeightedVelocityGBest(w); 
                         break;  
                     case 'b': // Vmax - Gbest
-                        Console.WriteLine("Using Vmax Velocity Update with Global Best"); 
-                        
-                        
-            
-
+                        //Console.WriteLine("Using Vmax Velocity Update with Global Best"); 
+                        CalculateVmaxVelocityGBest(); 
+                        break; 
+                    case 'c': // Constriction factor - gbest
+                        // Console.WriteLine("Using Constriction Factor Velocity Update with Global Best"); 
+                        // update velocity and position 
+                        CalculateConstrictionFactorVelocityGBest();
+                        break;
+                    case 'd': // Weighted Inertia - lbest   
+                        // Console.WriteLine("Using Weighted Inertia Velocity Update with  Local Best"); 
+                        w = wmax - (((wmax - wmin) * count) / (double)iterations);
+                        // update velocity and position
+                        CalculateWeightedVelocityLBest(w);
+                        break;
+                    case 'e': // Vmax - lbest
+                        //Console.WriteLine("Using Vmax Velocity Update with Local Best");
+                        CalculateVmaxVelocityLBest(); 
+                        break;
+                    case 'f': // Constriction factor - lbest
+                        // update velocity and position 
+                        CalculateConstrictionFactorVelocityLBest();
+                        break;
+                    case 'g': // change random r - seed?
+                        r = new Random();
+                        break; 
+                    default:
+                        CalculateVelocity(); //normal velocity
                         break; 
                 }
               
@@ -238,8 +261,6 @@ namespace ConsoleApplication1
 
 
         // REGULAR PSO----------------------------------------------------------------------------
-
-
         void CalculateVelocity()
         {
             foreach (Particle p in swarm)
@@ -247,46 +268,49 @@ namespace ConsoleApplication1
                 double v = p.GetVelocity();  // get current velocity
 
                 // update velocity
-                v = (double)(v + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                double vnew = (double)(v + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
                     + (c2 * r.NextDouble() * (p.GetLBest().GetPBest() - p.GetFitness())));
 
-                p.SetVelocity(v); // update particle velocity
+                p.SetVelocity(vnew); // update particle velocity
 
                 // update solution = add velocity v to each x 
                 double[] x_array = p.GetX();
                 for (int i = 0; i < 10; i++)
                 {
-                    x_array[i] = x_array[i] + v;
+                    x_array[i] = x_array[i] + vnew;
                 }
 
             }
             return; 
         }
 
-        // OPTION A: Weighted velocity w/ global best
-        // Vik+1 = wVik +c1 rand1(…) x (pbesti-sik) + c2 rand2(…) x (gbest-sik)
+        // OPTION A: Weighted velocity w/ global best        
         void CalculateWeightedVelocityGBest(double w)
         {
-            if (gbest != null)
+            // Vik+1 = wVik +c1 rand1(…) x (pbesti-sik) + c2 rand2(…) x (gbest-sik)
+
+            if (gbest == null) // if no gbest
             {
-                foreach (Particle p in swarm)
-                {
-                    double v = p.GetVelocity();  // get current velocity
-
-                    // update velocity
-                    v = (double)( (w * v) + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
-                        + (c2 * r.NextDouble() * (gbest.GetPBest() - p.GetFitness())));
-
-                    p.SetVelocity(v); // update particle velocity
-
-                    // update solution = add velocity v to each x 
-                    double[] x_array = p.GetX();
-                    for (int i = 0; i < 10; i++)
-                    {
-                        x_array[i] = x_array[i] + v;
-                    }
-                }
+                gbest = swarm.ElementAt(0); //set gbest as first particle 0
             }
+
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // update velocity
+                double vnew = (double)( (w * v) + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (gbest.GetPBest() - p.GetFitness())));
+
+                p.SetVelocity(vnew); // update particle velocity
+
+                // update solution = add velocity v to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + vnew;
+                }
+            }            
             return; 
         }
 
@@ -301,6 +325,124 @@ namespace ConsoleApplication1
                 else if currentv < -vmax then 
 	                currentv = -vmax
                 end */
+            if (gbest == null) // if no gbest
+            {
+                gbest = swarm.ElementAt(0); //set gbest as first particle 0
+            } 
+
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // calculate new velocity
+                double vnew = (double)(v + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (gbest.GetPBest() - p.GetFitness())));
+
+                // ensure vnew is within vmax bound
+                if (vnew > vmax)
+                {
+                    vnew = vmax;
+                }
+                else if (vnew < (-1) * vnew)
+                {
+                    vnew = (-1) * vmax;
+                }
+
+                p.SetVelocity(vnew); // update particle velocity with vnew
+
+                // update solution = add velocity vnew to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + vnew;
+                }
+            }
+            return;
+        }
+
+        // OPTION C: Constriction factor veloity w/ global best
+        void CalculateConstrictionFactorVelocityGBest()
+        {
+            /* vnew = K[vcurrent +c1*rand1*(pbest - currentfitness) + c2*rand2*(gbest - currentfitness)]
+            xfitness' = xfitness + vnew
+
+            phi = c1 + c2, phi > 4
+            K = 2/mag(2-phi-sqrt(phi^2 - 4*phi)) */
+
+            // constriction factor calculation
+            double phi = c1 + c2;
+            double k = 2 / (Complex.Abs(2 - phi - Math.Sqrt(Math.Pow(phi, 2) - (4 * phi))));
+            
+            if (gbest == null) // if no gbest
+            {
+                gbest = swarm.ElementAt(0); //set gbest as first particle 0
+            }
+
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // update velocity
+                double vnew = (double)((k * v) + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (gbest.GetPBest() - p.GetFitness())));
+
+                p.SetVelocity(vnew); // update particle velocity
+
+                // update solution = add velocity v to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + vnew;
+                }
+            }
+            return;
+        }
+
+        // OPTION D: Weighted velocity w/ local best        
+        void CalculateWeightedVelocityLBest(double w)
+        {
+            // Vik+1 = wVik +c1 rand1(…) x (pbesti-sik) + c2 rand2(…) x (gbest-sik)
+
+            if (gbest == null) // if no gbest
+            {
+                gbest = swarm.ElementAt(0); //set gbest as first particle 0
+            }
+
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // update velocity
+                double vnew = (double)((w * v) + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (p.GetLBest().GetPBest() - p.GetFitness())));
+
+                p.SetVelocity(vnew); // update particle velocity
+
+                // update solution = add velocity v to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + vnew;
+                }
+            }
+            return;
+        }
+
+        // OPTION E: Vmax Velocity w/ local best
+        void CalculateVmaxVelocityLBest()
+        {
+            /* vnew = vold + c1*rand1*(pbest - xfitness) + c2*rand2*(gbest - xfitness)
+                xfitness' = xfitness + vnew
+
+                if currentv > vmax then 
+	                currentv = vmax
+                else if currentv < -vmax then 
+	                currentv = -vmax
+                end */
+            if (gbest == null) // if no gbest
+            {
+                gbest = swarm.ElementAt(0); //set gbest as first particle 0
+            }
 
             foreach (Particle p in swarm)
             {
@@ -328,15 +470,48 @@ namespace ConsoleApplication1
                 {
                     x_array[i] = x_array[i] + vnew;
                 }
-
-               
-
-
-
-
             }
             return;
         }
+
+        // OPTION F: Constriction factor veloity w/ local best
+        void CalculateConstrictionFactorVelocityLBest()
+        {
+            /* vnew = K[vcurrent +c1*rand1*(pbest - currentfitness) + c2*rand2*(gbest - currentfitness)]
+            xfitness' = xfitness + vnew
+
+            phi = c1 + c2, phi > 4
+            K = 2/mag(2-phi-sqrt(phi^2 - 4*phi)) */
+
+            // constriction factor calculation
+            double phi = c1 + c2;
+            double k = 2 / (Complex.Abs(2 - phi - Math.Sqrt(Math.Pow(phi, 2) - (4 * phi))));
+
+            if (gbest == null) // if no gbest
+            {
+                gbest = swarm.ElementAt(0); //set gbest as first particle 0
+            }
+
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // update velocity
+                double vnew = (double)((k * v) + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (p.GetLBest().GetPBest() - p.GetFitness())));
+
+                p.SetVelocity(vnew); // update particle velocity
+
+                // update solution = add velocity v to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + vnew;
+                }
+            }
+            return;
+        }
+
 
     }
 }
