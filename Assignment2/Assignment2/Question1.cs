@@ -61,6 +61,7 @@ namespace Assignment2
         }
 
         // MAIN
+        //---------------------------------------------------------------------------------------
         public void RunPartA()
         {
             if (constraint == 0)
@@ -73,8 +74,7 @@ namespace Assignment2
             }
             return; 
         }
-
-
+        
         public void RunPartAWithoutConstraint()
         {
             Solution best_soln = new Solution(car_number); 
@@ -219,6 +219,7 @@ namespace Assignment2
             this.car_number = car_number; 
         }
         
+        //---------------------------------------------------------------------------------------
         // FITNESS FUNCTION
         // fitness function = for each car route
         // (sum of all city distances + distance from depot to first city
@@ -281,6 +282,7 @@ namespace Assignment2
             return cost;
         }
 
+        //---------------------------------------------------------------------------------------
         // OPERATOR
         // 1. switch city from 1 route to another
         // 2. switch order of city in route
@@ -365,6 +367,7 @@ namespace Assignment2
             soln.GetRoute(random_route1).AddLast(city1); // add it to the end
         }
 
+        //---------------------------------------------------------------------------------------
         // TEMPERATURE
         // start with high temperature
         // number of iterations at each temperature
@@ -376,6 +379,7 @@ namespace Assignment2
             temperature = (int) ((double)temperature * alpha); 
         }
 
+        //---------------------------------------------------------------------------------------
         // SOLUTION DECISION
         // initial solution 
         // evaluate solution
