@@ -32,9 +32,23 @@ namespace ConsoleApplication1
 
                         break;
                     case 'b':
-                        b = new Part1b(30, 1000, 0.5, 0.5);
-                        b.RunParticleSwarmOptimization();
-                        break;
+                        Console.WriteLine("Choose from the following variations: " 
+                            + "\n   [n] Regular PSO"
+                            + "\n   [a] Inertia Weight Velocity with Global Best"
+                            + "\n   [b] Vmax with Global Best"
+                            + "\n   [c] Constriction Factor Velocity with Global Best"
+                            + "\n   [d] Inertia Weight Velocity with Local Best"
+                            + "\n   [e] Vmax with Local Best"
+                            + "\n   [f] Constriction Factor Velocity with Local Best"
+                            + "\n   [g] Random Number Seed Variation (10x)");
+
+                        Char b1 = Console.ReadLine().ToLower().ToCharArray()[0];
+                        // run part 1b
+                        
+                                b = new Part1b(30, 1000, 0.5, 0.5, b1);
+                                b.RunParticleSwarmOptimization();
+                                break; 
+                        
                     case 'c':
 
 

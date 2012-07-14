@@ -14,20 +14,31 @@ namespace ConsoleApplication1
         double c1; // accel coefficient-pbest
         double c2; // accel coefficient-lbest
         Particle gbest; // best-so-far solution
-        Random r; 
+        Random r;
+        Char part4; 
+
+        // Weighted velocity
+        double wmax;
+        double wmin; 
+
 
         // CONSTRUCTOR
         /// <summary>
         ///  Initialize swarm 
         /// </summary>
         /// <param name="swarm_size"></param>
-        public Part1b(int swarm_size, int iterations, double c1, double c2)
+        public Part1b(int swarm_size, int iterations, double c1, double c2, char part4)
         {
-            // store swarm size, iterations, c1, c2
+            // store swarm size, iterations, c1, c2, part4
             this.swarm_size = swarm_size;
             this.iterations = iterations; 
             this.c1 = c1; 
-            this.c2 = c2; 
+            this.c2 = c2;
+            this.part4 = part4; 
+
+            // Weighted Velocity
+            this.wmax = 1;
+            this.wmax = 0; 
 
             // init random r
             r = new Random(); 
@@ -89,37 +100,7 @@ namespace ConsoleApplication1
                 }
 
                 /* Choose the particle with the best fitness value of neighbourhood particles as the LBest */
-
-                // update lbest values once all particle pbest values have been calculated
-                for(int i = 0; i < swarm_size; i++)
-                {
-                    Particle temp_best = swarm.ElementAt(i);
-
-                    for (int j = -3; j < 4; j++) // 3 neighbours on each side
-                    {
-                        if (j != 0)
-                        { // don't include current particle
-                            int neighbour = i + j;
-                            if (neighbour <= 0) // to deal with ...27-28-29-0-1-2-3... case
-                            {
-                                neighbour = neighbour + swarm_size - 1;
-                            }
-                            else if (neighbour >= swarm_size)
-                            {
-                                neighbour = neighbour - swarm_size; 
-                            }
-
-                            // if neighbourhood best is better than current p's pbest
-                            if (swarm.ElementAt(neighbour).GetPBest() < temp_best.GetPBest())
-                            {
-                                temp_best = swarm.ElementAt(neighbour); // store pbest as tempbest
-                            }
-                        }
-                    }
-                     // store tempbest as p's local best
-                    swarm.ElementAt(i).SetLBest(temp_best); 
-
-                }
+                CalulateLocalBest(); 
 
                 /*
                 For each particle
@@ -128,26 +109,29 @@ namespace ConsoleApplication1
                     Update particle position according equation (b)
                  * present[] = persent[] + v[] (b)
                 End */
-
-                foreach (Particle p in swarm)
+                
+                switch(part4)
                 {
-                    double v = p.GetVelocity();  // get current velocity
+                
+                    case 'n': // normal PSO 
+                        CalculateVelocity(); 
+                        break; 
+                    case 'a':
+                        // calculate weighting function
+                        /* w = wMax-[(wMax-wMin) x iter]/maxIter
+                            where wMax= initial weight,
+                            wMin = final weight,
+                            maxIter = maximum iteration number,
+                            iter = current iteration number. */
+                        double w = wmax - (((wmax - wmin) * count) / (double) iterations); 
 
-                    // update velocity
-                    v = (double) (v + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness())) 
-                        + (c2 * r.NextDouble() * (p.GetLBest().GetPBest() - p.GetFitness())));
-                    
-                    p.SetVelocity(v); // update particle velocity
+                        CalculateWeightedVelocityGBest(w); 
+                        break;  
+                    case 'b':
 
-                    // update solution = add velocity v to each x 
-                    double[] x_array = p.GetX();
-                    for (int i = 0; i < 10; i++)
-                    {
-                        x_array[i] = x_array[i] + v;
-                    }
-
-                }        
-       
+                        break; 
+                }
+              
                 // stopping condn = if pbest achieved (all x = 0) - break
                 foreach (Particle p in swarm)
                 {
@@ -203,6 +187,99 @@ namespace ConsoleApplication1
 
             p.SetFitness(sum); //set particle's fitness
             return sum; 
+        }
+
+        // CALCULATE LBEST FROM PARTICLE NEIGHBOURHOOD
+        void CalulateLocalBest()
+        {
+            // update lbest values once all particle pbest values have been calculated
+            for (int i = 0; i < swarm_size; i++)
+            {
+                Particle temp_best = swarm.ElementAt(i);
+
+                for (int j = -3; j < 4; j++) // 3 neighbours on each side
+                {
+                    if (j != 0)
+                    { // don't include current particle
+                        int neighbour = i + j;
+                        if (neighbour <= 0) // to deal with ...27-28-29-0-1-2-3... case
+                        {
+                            neighbour = neighbour + swarm_size - 1;
+                        }
+                        else if (neighbour >= swarm_size)
+                        {
+                            neighbour = neighbour - swarm_size;
+                        }
+
+                        // if neighbourhood best is better than current p's pbest
+                        if (swarm.ElementAt(neighbour).GetPBest() < temp_best.GetPBest())
+                        {
+                            temp_best = swarm.ElementAt(neighbour); // store pbest as tempbest
+                        }
+                    }
+                }
+                // store tempbest as p's local best
+                swarm.ElementAt(i).SetLBest(temp_best);
+
+            }
+        }
+
+        // CALCULATE VELOCITY AND UPDATE POSITION/SOLUTION
+
+
+        // REGULAR PSO----------------------------------------------------------------------------
+
+
+        void CalculateVelocity()
+        {
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // update velocity
+                v = (double)(v + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (p.GetLBest().GetPBest() - p.GetFitness())));
+
+                p.SetVelocity(v); // update particle velocity
+
+                // update solution = add velocity v to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + v;
+                }
+
+            }
+            return; 
+        }
+
+        // OPTION A: Weighted velocity w/ global best
+        // Vik+1 = wVik +c1 rand1(…) x (pbesti-sik) + c2 rand2(…) x (gbest-sik)
+        void CalculateWeightedVelocityGBest(double w)
+        {
+            if (gbest != null)
+            {
+                foreach (Particle p in swarm)
+                {
+                    double v = p.GetVelocity();  // get current velocity
+
+                    // update velocity
+                    v = (double)( (w * v) + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                        + (c2 * r.NextDouble() * (gbest.GetPBest() - p.GetFitness())));
+
+                    p.SetVelocity(v); // update particle velocity
+
+                    // update solution = add velocity v to each x 
+                    double[] x_array = p.GetX();
+                    for (int i = 0; i < 10; i++)
+                    {
+                        x_array[i] = x_array[i] + v;
+                    }
+
+                }
+
+            }
+            return; 
         }
 
     }
