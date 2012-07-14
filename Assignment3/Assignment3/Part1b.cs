@@ -15,12 +15,14 @@ namespace ConsoleApplication1
         double c2; // accel coefficient-lbest
         Particle gbest; // best-so-far solution
         Random r;
-        Char part4; 
+        Char part4; // decide which PSO version to run
 
         // Weighted velocity
-        double wmax;
+        double wmax; // max/min weighting factors
         double wmin; 
 
+        // Vmax
+        double vmax; //max velocity
 
         // CONSTRUCTOR
         /// <summary>
@@ -37,8 +39,11 @@ namespace ConsoleApplication1
             this.part4 = part4; 
 
             // Weighted Velocity
-            this.wmax = 1;
-            this.wmax = 0; 
+            this.wmax = 1.0; // influence of current velocity
+            this.wmin = 0.0; // on velocity update fxn
+            
+            // Vmax
+            vmax = 5.0; // bound on particle velocity
 
             // init random r
             r = new Random(); 
@@ -116,7 +121,8 @@ namespace ConsoleApplication1
                     case 'n': // normal PSO 
                         CalculateVelocity(); 
                         break; 
-                    case 'a':
+                    case 'a': // Weighted Inertia - gbest  
+                        // Console.WriteLine("Using Weighted Inertia Velocity Update with Global Best"); 
                         // calculate weighting function
                         /* w = wMax-[(wMax-wMin) x iter]/maxIter
                             where wMax= initial weight,
@@ -124,10 +130,14 @@ namespace ConsoleApplication1
                             maxIter = maximum iteration number,
                             iter = current iteration number. */
                         double w = wmax - (((wmax - wmin) * count) / (double) iterations); 
-
+                        // update velocity and position
                         CalculateWeightedVelocityGBest(w); 
                         break;  
-                    case 'b':
+                    case 'b': // Vmax - Gbest
+                        Console.WriteLine("Using Vmax Velocity Update with Global Best"); 
+                        
+                        
+            
 
                         break; 
                 }
@@ -275,11 +285,57 @@ namespace ConsoleApplication1
                     {
                         x_array[i] = x_array[i] + v;
                     }
-
                 }
-
             }
             return; 
+        }
+
+        // OPTION B: Vmax Velocity w/ global best
+        void CalculateVmaxVelocityGBest()
+        {
+            /* vnew = vold + c1*rand1*(pbest - xfitness) + c2*rand2*(gbest - xfitness)
+                xfitness' = xfitness + vnew
+
+                if currentv > vmax then 
+	                currentv = vmax
+                else if currentv < -vmax then 
+	                currentv = -vmax
+                end */
+
+            foreach (Particle p in swarm)
+            {
+                double v = p.GetVelocity();  // get current velocity
+
+                // calculate new velocity
+                double vnew = (double)(v + (c1 * r.NextDouble() * (p.GetPBest() - p.GetFitness()))
+                    + (c2 * r.NextDouble() * (p.GetLBest().GetPBest() - p.GetFitness())));
+
+                // ensure vnew is within vmax bound
+                if (vnew > vmax)
+                {
+                    vnew = vmax;
+                }
+                else if (vnew < (-1) * vnew)
+                {
+                    vnew = (-1) * vmax;
+                }
+
+                p.SetVelocity(vnew); // update particle velocity with vnew
+
+                // update solution = add velocity vnew to each x 
+                double[] x_array = p.GetX();
+                for (int i = 0; i < 10; i++)
+                {
+                    x_array[i] = x_array[i] + vnew;
+                }
+
+               
+
+
+
+
+            }
+            return;
         }
 
     }
