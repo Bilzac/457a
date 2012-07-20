@@ -48,36 +48,27 @@ namespace ConsoleApplication1
 
             // init random r
             r = new Random(); 
-
+            
+              /*  For each particle
+              Initialize particle
+              END*/
             // initialize swarm 
             swarm = new LinkedList<Particle>(); 
             for (int i = 0; i < swarm_size; i++)
             {
                 // init particle
                 Particle p = new Particle(i);
-
-
                 // add to swarm
                 swarm.AddLast(p); 
-
             }
 
         }
 
-
-        /*  For each particle
-      Initialize particle
-  END
-
-
-  Do
-     
-
-    
-  While maximum iterations or minimum error criteria is not attained or best achieved 
-         * */
+            
+  //While maximum iterations or minimum error criteria is not attained or best achieved 
+        
         // RUN ALGORITHM
-        public void RunParticleSwarmOptimization()
+        public Particle RunParticleSwarmOptimization()
         {
             int count = 0; 
 
@@ -99,7 +90,7 @@ namespace ConsoleApplication1
 
                     // particle's current fitness is better than its pbest
                     // update pbest with current fitness
-                    if (current_fitness < p.GetPBest())
+                    if ( Math.Abs(current_fitness) < Math.Abs(p.GetPBest()) )
                     {
                         p.SetPBest(current_fitness); 
                     }                    
@@ -116,9 +107,9 @@ namespace ConsoleApplication1
                  * present[] = persent[] + v[] (b)
                 End */
                 
+                // choose between the different velocity up date options
                 switch(part4)
-                {
-                
+                {                
                     case 'n': // normal PSO 
                         CalculateVelocity(); 
                         break; 
@@ -158,7 +149,14 @@ namespace ConsoleApplication1
                         CalculateConstrictionFactorVelocityLBest();
                         break;
                     case 'g': // change random r - seed?
-                        r = new Random();
+                        int factor = iterations / 10; 
+                        int remainder = 0; 
+                        Math.DivRem(count, factor, out remainder);
+                        if (remainder == 0) // count is divisible by factor
+                        {
+                            r = new Random(); 
+                        }                        
+                        CalculateVelocity(); // use normal velocity
                         break; 
                     default:
                         CalculateVelocity(); //normal velocity
@@ -173,7 +171,7 @@ namespace ConsoleApplication1
                     {
                         gbest = p;
                     }
-                    else if (p.GetPBest() < gbest.GetPBest())
+                    else if (Math.Abs(p.GetPBest()) < Math.Abs(gbest.GetPBest()))
                     {
                         gbest = p;                         
                     }
@@ -189,19 +187,22 @@ namespace ConsoleApplication1
                 //    + "\nBest-so-far: " + gbest.GetPBest().ToString()); 
                 count++;
 
-                //if (count == 0 || count == 10 ||
-                //    count == 100 || count == 1000 || count == 10000)
-                //{
-                //    // print gbest
-                //    Console.WriteLine("\n\nIteration Best: ");
-                //    gbest.Print(count); 
-                //}
+                // print solutions at 0, 10, 100, 1000, 10000 iterations
+                if (count == 0 || count == 10 ||
+                    count == 100 || count == 1000 || count == 10000)
+                {
+                    // print gbest
+                    Console.WriteLine("\n\nIteration Best: ");
+                    gbest.Print(count);
+                }
 
             }
 
             // print gbest
             Console.WriteLine("\n\n\n\nGlobal Best: ");
-            gbest.Print(iterations); 
+            gbest.Print(iterations);
+
+            return gbest; 
         }
 
         // CALCULATE PARTICLE FITNESS

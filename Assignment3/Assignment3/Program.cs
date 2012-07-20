@@ -9,11 +9,15 @@ namespace ConsoleApplication1
     {
         static void Main(string[] args)
         {
+            /* part b stuff */
+            Part1b b = null;
+            int brun = 0; // track runs 
+            Particle rbest = null; // run best    
+            
+            
             while (true)
             {
-                //Question1 q1 = null;
-                Part1b b = null;
-                //Question3 q3 = null;
+                
 
                 Console.WriteLine("===============================================================");
                 Console.WriteLine("ECE457A - ASSIGNMENT 3");
@@ -32,6 +36,8 @@ namespace ConsoleApplication1
 
                         break;
                     case 'b':
+
+
                         Console.WriteLine("Choose from the following variations: " 
                             + "\n   [n] Regular PSO"
                             + "\n   [a] Inertia Weight Velocity with Global Best"
@@ -44,9 +50,22 @@ namespace ConsoleApplication1
 
                         Char b1 = Console.ReadLine().ToLower().ToCharArray()[0];
                         // run part 1b - need to add switch based on b1
-                        
-                                b = new Part1b(30, 1000, 2.5, 2.5, b1);
-                                b.RunParticleSwarmOptimization();
+                                
+                                b = new Part1b(30, 10000, 2.5, 2.5, b1);
+                                Particle new_best = b.RunParticleSwarmOptimization();
+
+                                // store run best
+                                if (rbest == null)
+                                {
+                                    rbest = new_best;
+                                }else if (Math.Abs(rbest.GetPBest()) > Math.Abs(new_best.GetPBest()))
+                                {
+                                    rbest = new_best;
+                                }
+                                brun++; // run partb 
+
+                                Console.WriteLine("\n Run: " + brun.ToString());
+                                rbest.Print(brun); 
                                 break; 
                         
                     case 'c':
