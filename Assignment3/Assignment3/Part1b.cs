@@ -61,7 +61,6 @@ namespace ConsoleApplication1
                 // add to swarm
                 swarm.AddLast(p); 
             }
-
         }
 
             
@@ -188,13 +187,13 @@ namespace ConsoleApplication1
                 count++;
 
                 // print solutions at 0, 10, 100, 1000, 10000 iterations
-                if (count == 0 || count == 10 ||
-                    count == 100 || count == 1000 || count == 10000)
-                {
-                    // print gbest
-                    Console.WriteLine("\n\nIteration Best: ");
-                    gbest.Print(count);
-                }
+                //if (count == 0 || count == 10 ||
+                //    count == 100 || count == 1000 || count == 10000)
+                //{
+                //    // print gbest
+                //    Console.WriteLine("\n\nIteration Best: ");
+                //    gbest.Print(count);
+                //}
 
             }
 

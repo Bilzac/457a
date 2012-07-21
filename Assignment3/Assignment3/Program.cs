@@ -10,7 +10,7 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
             /* part b stuff */
-            Part1b b = null;
+            Part1b partb = null;
             int brun = 0; // track runs 
             Particle rbest = null; // run best    
             
@@ -36,8 +36,7 @@ namespace ConsoleApplication1
 
                         break;
                     case 'b':
-
-
+                        // print options
                         Console.WriteLine("Choose from the following variations: " 
                             + "\n   [n] Regular PSO"
                             + "\n   [a] Inertia Weight Velocity with Global Best"
@@ -50,23 +49,27 @@ namespace ConsoleApplication1
 
                         Char b1 = Console.ReadLine().ToLower().ToCharArray()[0];
                         // run part 1b - need to add switch based on b1
-                                
-                                b = new Part1b(30, 10000, 2.5, 2.5, b1);
-                                Particle new_best = b.RunParticleSwarmOptimization();
+                        for (int x = 0; x < 10; x++)
+                        {
+                            partb = new Part1b(30, 10000, 2.5, 2.5, b1);
+                            Particle new_best = partb.RunParticleSwarmOptimization();
 
-                                // store run best
-                                if (rbest == null)
-                                {
-                                    rbest = new_best;
-                                }else if (Math.Abs(rbest.GetPBest()) > Math.Abs(new_best.GetPBest()))
-                                {
-                                    rbest = new_best;
-                                }
-                                brun++; // run partb 
+                            // store run best
+                            if (rbest == null)
+                            {
+                                rbest = new_best;
+                            }
+                            else if (Math.Abs(rbest.GetPBest()) > Math.Abs(new_best.GetPBest()))
+                            {
+                                rbest = new_best;
+                            }
+                            brun++; // run partb 
+                        }
+                        Console.WriteLine("\nRun: " + brun.ToString()
+                            + "\nOption: " + b1);
+                        rbest.Print(brun);
 
-                                Console.WriteLine("\n Run: " + brun.ToString());
-                                rbest.Print(brun); 
-                                break; 
+                        break; 
                         
                     case 'c':
 
