@@ -3,3 +3,8 @@ C:\Code\ECE457A\457a\Assignment3\Assignment3\bin\Debug\Assignment3.exe
 C:\Code\ECE457A\457a\Assignment3\Assignment3\bin\Debug\Assignment3.pdb
 C:\Code\ECE457A\457a\Assignment3\Assignment3\obj\x86\Debug\Assignment3.exe
 C:\Code\ECE457A\457a\Assignment3\Assignment3\obj\x86\Debug\Assignment3.pdb
+C:\Users\Pooja\Desktop\Waterloo\4A\ECE 457a\AssignmentCode\Assignment3\Assignment3\obj\x86\Debug\Assignment3.exe
+C:\Users\Pooja\Desktop\Waterloo\4A\ECE 457a\AssignmentCode\Assignment3\Assignment3\obj\x86\Debug\Assignment3.pdb
+C:\Users\Pooja\Desktop\Waterloo\4A\ECE 457a\AssignmentCode\Assignment3\Assignment3\bin\Debug\Assignment3.exe
+C:\Users\Pooja\Desktop\Waterloo\4A\ECE 457a\AssignmentCode\Assignment3\Assignment3\bin\Debug\Assignment3.pdb
+C:\Users\Pooja\Desktop\Waterloo\4A\ECE 457a\AssignmentCode\Assignment3\Assignment3\obj\x86\Debug\ResolveAssemblyReference.cache

@@ -44,6 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ant.cs" />
+    <Compile Include="Part2.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="Part1b.cs" />
     <Compile Include="Program.cs" />

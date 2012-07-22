@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Assignment3;
 
 namespace ConsoleApplication1
 {
@@ -17,8 +18,6 @@ namespace ConsoleApplication1
             
             while (true)
             {
-                
-
                 Console.WriteLine("===============================================================");
                 Console.WriteLine("ECE457A - ASSIGNMENT 3");
                 Console.WriteLine("Shweta Aladi, Bilal Arshad, Pooja Sardesai");
@@ -72,8 +71,8 @@ namespace ConsoleApplication1
                         break; 
                         
                     case 'c':
-
-
+                        Part2 p2 = new Part2();
+                        p2.RunPart2();
                         break;
                     case 'q':
                         Console.WriteLine("Exiting...");
