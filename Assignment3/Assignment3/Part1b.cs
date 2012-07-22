@@ -98,9 +98,12 @@ namespace ConsoleApplication1
                 // choose between the different velocity update options
                 switch (part4)
                 {
-                    case 'n': // normal PSO 
+                    case 'x': // normal PSO - global best
                         CalculateVelocity();
                         break;
+                    case 'y': // normal PSO - local best
+                        CalculateVelocityLBest();
+                        break; 
                     case 'a': // Weighted Inertia - gbest  
                         // Console.WriteLine("Using Weighted Inertia Velocity Update with Global Best"); 
                         // calculate weighting function
@@ -229,6 +232,24 @@ namespace ConsoleApplication1
                     //velocity
                     double vnew = p.GetVelocity(i) + (c1 * r.NextDouble() * (p.GetPBest().GetX(i) - p.GetX(i)))
                         + (c2 * r.NextDouble() * (gbest.GetX(i) - p.GetX(i)));
+                    p.SetVelocity(i, vnew);
+                    double xnew = p.GetX(i) + vnew;
+                    p.SetX(i, xnew);
+                }
+            }
+            return;
+        }
+
+        // REGULAR PSO----------------------------------------------------------------------------
+        void CalculateVelocityLBest()
+        {
+            foreach (Particle p in swarm)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    //velocity
+                    double vnew = p.GetVelocity(i) + (c1 * r.NextDouble() * (p.GetPBest().GetX(i) - p.GetX(i)))
+                        + (c2 * r.NextDouble() * (p.GetLBest().GetX(i) - p.GetX(i)));
                     p.SetVelocity(i, vnew);
                     double xnew = p.GetX(i) + vnew;
                     p.SetX(i, xnew);

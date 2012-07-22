@@ -37,7 +37,8 @@ namespace ConsoleApplication1
                     case 'b':
                         // print options
                         Console.WriteLine("Choose from the following variations: " 
-                            + "\n   [n] Regular PSO"
+                            + "\n   [x] Regular PSO with Global Best"
+                            + "\n   [y] Regular PSO with Local Best"
                             + "\n   [a] Inertia Weight Velocity with Global Best"
                             + "\n   [b] Vmax with Global Best"
                             + "\n   [c] Constriction Factor Velocity with Global Best"
