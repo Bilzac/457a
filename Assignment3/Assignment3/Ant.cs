@@ -90,5 +90,9 @@ namespace Assignment3
             _currentCity = city;
             _remaining.Remove(city);
         }
+
+        public int getCity(int index) {
+            return _tour.ElementAt(index);
+        }
     }
 }

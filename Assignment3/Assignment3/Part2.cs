@@ -27,6 +27,13 @@ namespace Assignment3
         bool onlineUpdate = true;
         bool offlineUpdate = false;
         bool localSearch = false;
+        bool cooperative = false;
+
+        // VARIABLES FOR COOPERATIVE ALGORITHM
+        List<Ant> antCol1;
+        List<Ant> antCol2;
+        double[,] pherCol1 = new double[30, 30];
+        double[,] pherCol2 = new double[30, 30];
 
         // CONSTRUCTOR
         public Part2() { }
@@ -79,6 +86,62 @@ namespace Assignment3
             displayGlobalBest(globalBest);
         }
 
+        public void doCooperativeAlgorithm() {
+            int iteration = 0;
+
+            Ant globalBest = new Ant();
+            setConstructionGraph();
+
+            bool foundNewBest = false;
+            while (iteration < maxIterations) {
+                Ant iterationBest = new Ant();
+                initializeAnts(); // put all ants in random cities
+
+                // get best ant from col 2
+                if (foundNewBest) {
+                    antCol1.Add(globalBest);
+                    foundNewBest = false;
+                }
+
+                // construct a bunch of ant solutions from col 1
+                foreach (Ant ant in antCol1) {
+                    constructAntSolution(ant, 1);
+                    if (ant.distance < iterationBest.distance) 
+                        iterationBest = ant;
+                    if (ant.distance < globalBest.distance) {
+                        displayCurrentBest(ant, iteration);
+                        globalBest = ant;
+                        foundNewBest = true; // transfer to colony 2
+                    }
+                }
+
+                // get best ant from col 1
+                if (foundNewBest) {
+                    antCol2.Add(globalBest); // get best ant from col 1
+                    foundNewBest = false;
+                }
+
+                // construct a bunch of ant solutions from col 2
+                foreach (Ant ant in antCol2) {
+                    constructAntSolution(ant, 2);
+                    if (ant.distance < iterationBest.distance) 
+                        iterationBest = ant;
+                    if (ant.distance < globalBest.distance) {
+                        displayCurrentBest(ant, iteration);
+                        globalBest = ant;
+                        foundNewBest = true; // transfer to colony 1
+                    }
+                }
+
+                evaporatePheromoneLevels(); // evaporate some percentage of pheromones
+                onlinePheromoneUpdate(); // update all ant paths
+
+                iteration++;
+            }
+
+            displayGlobalBest(globalBest);
+        }
+
         public void setConstructionGraph() {
             // set construction graph
             int[,] coordinates = setCoordinates();
@@ -87,39 +150,122 @@ namespace Assignment3
         }
 
         public void initializeAnts() {
-            ants = new List<Ant>();
-            for (int i = 0; i < numAnts; i++) {
-                Ant ant = new Ant();
-                ant.initialize(random);
-                ants.Add(ant);
+            if (cooperative) {
+                // add equal number of ants to both colonies
+                antCol1 = new List<Ant>();
+                antCol2 = new List<Ant>();
+                for (int i = 0; i < numAnts; i++) {
+                    Ant ant = new Ant();
+                    ant.initialize(random);
+                    antCol1.Add(ant);
+                    Ant ant2 = new Ant();
+                    ant2.initialize(random);
+                    antCol1.Add(ant2);
+                }             
+            } else {
+                ants = new List<Ant>();
+                for (int i = 0; i < numAnts; i++) {
+                    Ant ant = new Ant();
+                    ant.initialize(random);
+                    ants.Add(ant);
+                }
             }
         }
 
-        public void constructAntSolution(Ant ant) {
+        public void constructAntSolution(Ant ant, int colonyType = 0) {
             int numCities = ant.remainingCities.Count();
             for (int i = 0; i < numCities; i++) {
-                applyTransitionRule(ant);
+                if (!cooperative)
+                    applyTransitionRule(ant);
+                else if (colonyType == 1) {
+                    applyTransitionRuleCooperative(ant, colonyType);
+                } else {
+                    applyTransitionRuleCooperative(ant, colonyType);
+                }
             }
+        }
+
+        public void applyTransitionRuleCooperative(Ant ant, int colonyType = 0) {
+            int city = ant.currentCity;
+            int nextCity = 0;
+
+            double totalProbability = 0;
+            double highestProbability = 0;
+            List<int> cities = ant.remainingCities;
+            foreach (int i in cities) {
+                if (colonyType == 1) {
+                    totalProbability =
+                        totalProbability +
+                        (Math.Pow(pherCol1[city, i], alpha) / Math.Pow(distance[city, i], beta));
+                }
+                else {
+                    totalProbability =
+                        totalProbability +
+                        (Math.Pow(pherCol2[city, i], alpha) / Math.Pow(distance[city, i], beta));
+                }
+            }
+
+            foreach (int i in cities) {
+                double probability = 0;
+                if (colonyType == 1) {
+                    probability =
+                     (Math.Pow(pherCol1[city, i], alpha) / Math.Pow(distance[city, i], beta)) / totalProbability;
+                }
+                else {
+                    probability =
+                     (Math.Pow(pherCol2[city, i], alpha) / Math.Pow(distance[city, i], beta)) / totalProbability;
+                }
+
+                if (probability > highestProbability) {
+                    nextCity = i;
+                    highestProbability = probability;
+                }
+            }
+
+            ant.updateDistance(distance[city, nextCity]);
+            ant.addCity(nextCity);
         }
 
         public void evaporatePheromoneLevels() {
             for (int i = 1; i <= NUM_CITIES; i++) {
                 for (int j = 1; j <= NUM_CITIES; j++) {
                     pheromone[i,j] = (1 - pheramonePersistentConstant) * pheromone[i,j];
+                    pherCol1[i, j] = (1 - pheramonePersistentConstant) * pherCol1[i, j];
+                    pherCol2[i, j] = (1 - pheramonePersistentConstant) * pherCol2[i, j];
                 }
             }
         }
 
         public void onlinePheromoneUpdate() {
             // update each edge
-            foreach (Ant ant in ants) {
-                for (int i = 0; i < NUM_CITIES - 1; i++) {
-                    int x = ant.tour.ElementAt(i);
-                    int y = ant.tour.ElementAt(i+1);
+            if (!cooperative) {
+                foreach (Ant ant in ants) {
+                    for (int i = 0; i < NUM_CITIES - 1; i++) {
+                        int x = ant.tour.ElementAt(i);
+                        int y = ant.tour.ElementAt(i+1);
 
-                    // use ant quantity model
-                    pheromone[x, y] = pheromone[x, y] + (CONSTANT_VALUE_Q / ant.distance);
-                    pheromone[y, x] = pheromone[y, x] + (CONSTANT_VALUE_Q / ant.distance);
+                        // use ant quantity model
+                        pheromone[x, y] = pheromone[x, y] + (CONSTANT_VALUE_Q / ant.distance);
+                        pheromone[y, x] = pheromone[y, x] + (CONSTANT_VALUE_Q / ant.distance);
+                    }
+                }
+            } else {
+                foreach (Ant ant in antCol1) {
+                    for (int i = 0; i < NUM_CITIES - 1; i++) {
+                        int x = ant.tour.ElementAt(i);
+                        int y = ant.tour.ElementAt(i + 1);
+                        pherCol1[x, y] = pherCol1[x, y] + (CONSTANT_VALUE_Q / ant.distance);
+                        pherCol1[y, x] = pherCol1[y, x] + (CONSTANT_VALUE_Q / ant.distance);
+                    }
+                }
+
+                foreach (Ant ant in antCol2) {
+                    for (int i = 0; i < NUM_CITIES - 1; i++) {
+                        int x = ant.tour.ElementAt(i);
+                        int y = ant.tour.ElementAt(i + 1);
+                        pherCol2[x, y] = pherCol2[x, y] + (CONSTANT_VALUE_Q / ant.distance);
+                        pherCol2[y, x] = pherCol2[y, x] + (CONSTANT_VALUE_Q / ant.distance);
+                    }
                 }
             }
         }
@@ -195,6 +341,8 @@ namespace Assignment3
             for (int i = 1; i <= NUM_CITIES; i++) {
                 for (int j = 1; j <= NUM_CITIES; j++) {
                     pheromone[i, j] = 1;
+                    pherCol1[i, j] = 1;
+                    pherCol2[i, j] = 1;
                 }
             }
         }
@@ -251,6 +399,7 @@ namespace Assignment3
                 onlineUpdate = true;
                 offlineUpdate = false;
                 localSearch = false;
+                cooperative = false;
                 Console.WriteLine("\n**********");
                 Console.WriteLine("Select part:\n" +
                                     "[a] Part 2\n" +
@@ -263,7 +412,7 @@ namespace Assignment3
                     case 'a': doSimpleACO(); break;
                     case 'b': displayPart3Options(); break;
                     case 'c': displayPart4Options(); break;
-                    case 'd': break;
+                    case 'd': cooperative = true; doCooperativeAlgorithm(); break;
                     case 'e': Console.WriteLine("Exiting..."); return;
                     default:  Console.WriteLine("Invalid selection"); break;
                 }
@@ -399,7 +548,13 @@ namespace Assignment3
         }
 
         public void displayGlobalBest(Ant ant) {
-
+            Console.WriteLine("Best Cost: " + ant.distance);
+            Console.WriteLine("Best Tour: " + ant.getCity(0) + " " + ant.getCity(1) + " " + ant.getCity(2) + " " + ant.getCity(3) + " " + ant.getCity(4));
+            Console.WriteLine("           " + ant.getCity(5) + " " + ant.getCity(6) + " " + ant.getCity(7) + " " + ant.getCity(8) + " " + ant.getCity(9));
+            Console.WriteLine("           " + ant.getCity(10) + " " + ant.getCity(11) + " " + ant.getCity(12) + " " + ant.getCity(13) + " " + ant.getCity(14));
+            Console.WriteLine("           " + ant.getCity(15) + " " + ant.getCity(16) + " " + ant.getCity(17) + " " + ant.getCity(18) + " " + ant.getCity(19));
+            Console.WriteLine("           " + ant.getCity(20) + " " + ant.getCity(21) + " " + ant.getCity(22) + " " + ant.getCity(23) + " " + ant.getCity(24));
+            Console.WriteLine("           " + ant.getCity(25) + " " + ant.getCity(26) + " " + ant.getCity(27) + " " + ant.getCity(28));
         }
     }
 }
