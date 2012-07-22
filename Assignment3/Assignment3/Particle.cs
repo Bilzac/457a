@@ -8,46 +8,50 @@ namespace ConsoleApplication1
     class Particle
     {
         // GLOBAL VARIABLES
-        double[] x;
+        public double[] x;
         Random r; 
         double fitness;
-        double pbest; // personal best
+        Particle pbest; // personal best
         Particle lbest; // local best
-        double velocity; 
+        public double[] velocity; 
         int particle_number; 
 
         // constructor
         public Particle(int p_number)
         {
             // init random 
-            r = new Random(); 
-            
+            r = new Random();
+
             // init array
-            this.x = new double [10]; 
+            this.x = new double[10];
+            this.velocity = new double[10]; 
 
             // init pbest, velocity
-            this.pbest = 100000.0; //high number
-            this.velocity = 0.0; 
-            
+            this.pbest = null; //high number
+            this.lbest = null; 
+           
             // store particle number
-            this.particle_number = p_number; 
+            this.particle_number = p_number;
 
             // populate x value with random numbers from -10.0 to 10.0
-            for(int i = 0; i < 10; i++)
-            {                
-                int neg = r.Next(2); //random 1 or 0
-                if (neg == 1) // neg == 1
-                {
-                    this.x[i] = (-1) * r.NextDouble(); // x[i] is negative
-                }
-                else
-                {
-                    this.x[i] = r.NextDouble(); // x[i] is positive
-                }
+            for (int i = 0; i < 10; i++)
+            {
+                r = new Random(p_number + i + r.Next());
+                this.x[i] = r.Next(-10, 10) * r.NextDouble(); // x[i]                 
+                this.velocity[i] = 0.0;                    
             }
-
         }
-    
+
+        public Particle Clone()
+        {
+            Particle p = new Particle(this.particle_number);
+            
+            this.x.CopyTo(p.x, 0);
+            this.velocity.CopyTo(p.velocity, 0); 
+            
+            p.SetFitness(this.fitness);
+            return p; 
+        }
         // get fitness
         public double GetFitness()
         {
@@ -61,13 +65,13 @@ namespace ConsoleApplication1
         }
 
         // get personal best pbest
-        public double GetPBest()
+        public Particle GetPBest()
         {
             return this.pbest;
         }
 
         // set personal best pbest
-        public void SetPBest(double pbest)
+        public void SetPBest(Particle pbest)
         {
             this.pbest = pbest; 
         }
@@ -85,23 +89,33 @@ namespace ConsoleApplication1
         }
 
         // get array of x values
-        public double[] GetX()
+        public double GetX(int i)
         {
-            return this.x; 
+            return this.x[i]; 
+        }
+
+        public void SetX(int i, double value)
+        {
+            this.x[i] = value;
         }
 
         // get velocity
-        public double GetVelocity()
+        public double GetVelocity(int i)
         {
-            return this.velocity; 
+            return this.velocity[i]; 
         }
 
         // set velocity
-        public void SetVelocity(double velocity)
+        public void SetVelocity(int i, double value)
         {
-            this.velocity = velocity; 
+            this.velocity[i] = value; 
         }
 
+        // particle number
+        public int GetParticleNumber()
+        {
+            return this.particle_number; 
+        }
         // print particle
         public void Print(int iteration)
         {
@@ -113,7 +127,7 @@ namespace ConsoleApplication1
             {
                 Console.Write(x[i] + " "); 
             }
-            Console.WriteLine("\nSolution Sum: " + pbest);
+            Console.WriteLine("\nSolution Sum: " + fitness.ToString());
             Console.WriteLine("--------------------------------\n");
         }
 

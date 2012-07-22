@@ -50,15 +50,15 @@ namespace ConsoleApplication1
                         // run part 1b - need to add switch based on b1
                         for (int x = 0; x < 10; x++)
                         {
-                            partb = new Part1b(30, 10000, 2.5, 2.5, b1);
-                            Particle new_best = partb.RunParticleSwarmOptimization();
+                           partb = new Part1b(30, 10000, 2.5, 2.5, b1);
+                            Particle new_best = partb.RunSwarm();
 
                             // store run best
                             if (rbest == null)
                             {
                                 rbest = new_best;
                             }
-                            else if (Math.Abs(rbest.GetPBest()) > Math.Abs(new_best.GetPBest()))
+                            else if (Math.Abs(rbest.GetFitness()) > Math.Abs(new_best.GetFitness()))
                             {
                                 rbest = new_best;
                             }
