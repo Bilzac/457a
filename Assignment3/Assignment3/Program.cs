@@ -10,6 +10,8 @@ namespace ConsoleApplication1
     {
         static void Main(string[] args)
         {
+            Part1a parta = null;
+            Particle1a rbesta = null;
             /* part b stuff */
             Part1b partb = null;
             int brun = 0; // track runs 
@@ -32,7 +34,30 @@ namespace ConsoleApplication1
                 switch (a)
                 {
                     case 'a':
+                        Console.WriteLine("Choose from the following variations: "
+                            + "\n   [x] Regular PSO with Global Best"
+                            + "\n   [y] Regular PSO with Local Best"
+                            + "\n   [a] Inertia Weight Velocity with Global Best"
+                            + "\n   [b] Vmax with Global Best"
+                            + "\n   [c] Constriction Factor Velocity with Global Best"
+                            + "\n   [d] Inertia Weight Velocity with Local Best"
+                            + "\n   [e] Vmax with Local Best"
+                            + "\n   [f] Constriction Factor Velocity with Local Best"
+                            + "\n   [g] Random Number Seed Variation (10x)");
+                 
+                        Char a1 = Console.ReadLine().ToLower().ToCharArray()[0];
 
+                        for (int i = 0; i < 10; i++)
+                        {
+                            parta = new Part1a(30, 10000, 2.5, 2.5, a1);
+                            Particle1a solution = parta.RunPSO();
+                            if (rbesta == null || rbesta.GetFitness() > solution.GetFitness())
+                            {
+                                rbesta = solution;
+                            }
+                        }
+                        Console.WriteLine("Best Solution");
+                        Console.WriteLine(rbesta.toString());
                         break;
                     case 'b':
                         // print options
