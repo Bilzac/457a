@@ -196,12 +196,12 @@ namespace Assignment3
                 if (colonyType == 1) {
                     totalProbability =
                         totalProbability +
-                        (Math.Pow(pherCol1[city, i], alpha) / Math.Pow(distance[city, i], beta));
+                        (Math.Pow(pherCol1[city, i], 0.2) / Math.Pow(distance[city, i], 0.8));
                 }
                 else {
                     totalProbability =
                         totalProbability +
-                        (Math.Pow(pherCol2[city, i], alpha) / Math.Pow(distance[city, i], beta));
+                        (Math.Pow(pherCol2[city, i], 0.8) / Math.Pow(distance[city, i], 0.2));
                 }
             }
 
