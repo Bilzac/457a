@@ -80,7 +80,6 @@ namespace ConsoleApplication1
                 {
                     if (p.GetFitness() < gbest.GetFitness())
                     {
-                        Console.WriteLine("Updated!");
                         gbest = p.Clone();
                     }
                 }
@@ -146,7 +145,7 @@ namespace ConsoleApplication1
 
                 // gbest.Print(count); 
                 // print solutions at 0, 10, 100, 1000, 10000 iterations
-                if (iteration == 0 || iteration < 10 ||
+                if (iteration == 0 || iteration == 10 ||
                     iteration == 100 || iteration == 1000 || iteration == 10000)
                 {
                     // print gbest                
