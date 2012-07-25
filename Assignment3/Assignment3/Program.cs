@@ -34,6 +34,7 @@ namespace ConsoleApplication1
                 switch (a)
                 {
                     case 'a':
+                        rbesta = null;
                         Console.WriteLine("Choose from the following variations: "
                             + "\n   [x] Regular PSO with Global Best"
                             + "\n   [y] Regular PSO with Local Best"
@@ -56,7 +57,7 @@ namespace ConsoleApplication1
                                 rbesta = solution;
                             }
                         }
-                        Console.WriteLine("Best Solution");
+                        Console.WriteLine("\nBest Solution");
                         Console.WriteLine(rbesta.toString());
                         break;
                     case 'b':

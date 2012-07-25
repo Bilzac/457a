@@ -154,7 +154,7 @@ namespace ConsoleApplication1
                 }
 
 
-            } while (iteration < this.maxIterations);
+            } while (iteration < this.maxIterations && gbest.GetFitness() > -1.0316);
             return gbest;
         }
 
